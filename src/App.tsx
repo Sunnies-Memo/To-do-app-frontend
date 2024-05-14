@@ -1,25 +1,40 @@
-import { ThemeProvider } from "styled-components";
-import { Reset } from "./GlobalStyle";
-import { darkTheme } from "./theme";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { hourSelector, minuteState } from "./atoms";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 
 function App() {
-  const [minutes, setMinutes] = useRecoilState(minuteState);
-  const [hours, setHours] = useRecoilState(hourSelector); // selector 의 반환값 첫번째 arg는 get의 리턴값, 두번째 arg는 set함수
-  const onMinutesChange = (event:React.FormEvent<HTMLInputElement>) => {
-    setMinutes(+event.currentTarget.value);
-  }
-  const onHoursChange = (event:React.FormEvent<HTMLInputElement>) => {
-    setHours(+event.currentTarget.value);
+  const onDragEnd = () => {
+
   }
     return (
     <>
-    <ThemeProvider theme={darkTheme}>
-      <Reset/>
-      <input value={minutes} onChange={onMinutesChange} type="number" placeholder="Minutes"/>
-      <input value={hours} onChange={onHoursChange} type="number" placeholder="Hours"/>
-    </ThemeProvider>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div>
+        <Droppable droppableId="one">
+          {(magic) => 
+          <ul ref={magic.innerRef} {...magic.droppableProps}>
+            <Draggable draggableId="first" index={0}>
+              {(magic) => 
+              <li 
+                ref={magic.innerRef} 
+                {...magic.draggableProps} 
+              >
+                <span {...magic.dragHandleProps}>aa</span>
+                One
+              </li>}
+            </Draggable>
+            <Draggable draggableId="second" index={1}>
+              {(magic) => <li 
+                ref={magic.innerRef} 
+                {...magic.draggableProps}
+              >
+                <span {...magic.dragHandleProps}>aa</span>
+                Two
+              </li>}
+            </Draggable>
+          </ul>
+          }
+        </Droppable>
+      </div>
+    </DragDropContext>
     </>
   );
 }
