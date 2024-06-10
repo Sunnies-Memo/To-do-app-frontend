@@ -1,8 +1,8 @@
-import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { useRecoilState } from "recoil";
 import styled  from "styled-components";
 import { toDoState } from "./atoms";
-import DragableCard from "./components/DragableCard";
+import Board from "./components/Board";
 
 const Wrapper = styled.div`
   display: flex;
@@ -19,44 +19,29 @@ const Boards = styled.div`
   grid-template-columns: repeat(1, 1fr);
 `
 
-const Board = styled.div`
-  background-color: ${props => props.theme.boardColor};
-  padding-top: 30px;
-  padding: 20px 10px;
-  border-radius: 5px;
-  min-height: 200px;
-`
+
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
   const onDragEnd = ({draggableId, destination, source}:DropResult) => {
-    if(!destination) return;
-    setToDos(prev => {
-      const copyToDos = [...prev];
-      //1. 원래 배열에서 요소 삭제
-      copyToDos.splice(source.index,1); //소스에서 1개 삭제
+    // if(!destination) return;
+    // setToDos(prev => {
+    //   const copyToDos = [...prev];
+    //   //1. 원래 배열에서 요소 삭제
+    //   copyToDos.splice(source.index,1); //소스에서 1개 삭제
       
-      //2. 목표 배열에 요소 추가
-      copyToDos.splice(destination?.index, 0, draggableId);
+    //   //2. 목표 배열에 요소 추가
+    //   copyToDos.splice(destination?.index, 0, draggableId);
 
-      return copyToDos;
-    })
+    //   return copyToDos;
+    // })
   }
     return (
     <>
     <DragDropContext onDragEnd={onDragEnd}>
       <Wrapper>
         <Boards>
-          <Droppable droppableId="one">
-            {(magic) => 
-            <Board ref={magic.innerRef} {...magic.droppableProps}>
-              {toDos.map((todo, index) => 
-              <DragableCard key={todo} index={index} todo={todo}/>
-              )}
-              {magic.placeholder}
-            </Board>
-            }
-          </Droppable>
+         {Object.keys(toDos).map(boardId => <Board boardId={boardId} key={boardId} toDos={toDos[boardId]}/>)}
         </Boards>
       </Wrapper>
     </DragDropContext>
