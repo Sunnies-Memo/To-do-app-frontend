@@ -6,41 +6,44 @@ import Board from "./components/Board";
 
 const Wrapper = styled.div`
   display: flex;
-  max-width: 480px;
-  width: 100%;
+  width: 100vw;
   margin: 0 auto;
   justify-content: center;
   align-items: center;
   height: 100vh;
 `
 const Boards = styled.div`
-  display: grid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  grid-template-columns: repeat(1, 1fr);
+  gap: 10px;
 `
 
 
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
-  const onDragEnd = ({draggableId, destination, source}:DropResult) => {
-    // if(!destination) return;
-    // setToDos(prev => {
-    //   const copyToDos = [...prev];
-    //   //1. 원래 배열에서 요소 삭제
-    //   copyToDos.splice(source.index,1); //소스에서 1개 삭제
-      
-    //   //2. 목표 배열에 요소 추가
-    //   copyToDos.splice(destination?.index, 0, draggableId);
-
-    //   return copyToDos;
-    // })
+  const onDragEnd = (info:DropResult) => {
+    const {destination, draggableId, source} = info;
+    if(destination?.droppableId === source.droppableId){
+      //same board movement
+      setToDos(prev => {
+        const boardCopy = [...prev[source.droppableId]];
+        boardCopy.splice(source.index, 1);
+        boardCopy.splice(destination?.index, 0, draggableId);
+        return {
+          ...prev,
+          [source.droppableId]:boardCopy
+        }
+      })
+    }
   }
     return (
     <>
     <DragDropContext onDragEnd={onDragEnd}>
-      <Wrapper>
-        <Boards>
+      <Wrapper className="wrapper">
+        <Boards className="boards">
          {Object.keys(toDos).map(boardId => <Board boardId={boardId} key={boardId} toDos={toDos[boardId]}/>)}
         </Boards>
       </Wrapper>
