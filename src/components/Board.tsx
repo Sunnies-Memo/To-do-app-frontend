@@ -1,10 +1,10 @@
 import { Droppable } from "react-beautiful-dnd";
 import DragableCard from "./DragableCard";
-import React, { useRef } from "react";
 import { styled } from "styled-components";
 import { useForm } from "react-hook-form";
 import { ITodo, toDoState } from "../atoms";
 import { useSetRecoilState } from "recoil";
+import React from "react";
 
 interface IAreaProps{
     isDraggingOver:boolean;
