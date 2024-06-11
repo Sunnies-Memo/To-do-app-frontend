@@ -32,7 +32,7 @@ function App() {
       setToDos(prev => {
         const boardCopy = [...prev[source.droppableId]];
         boardCopy.splice(source.index, 1);
-        boardCopy.splice(destination?.index, 0, draggableId);
+        boardCopy.splice(destination?.index, 0, {id:destination?.index, text:draggableId});
         return {
           ...prev,
           [source.droppableId]:boardCopy
@@ -45,7 +45,7 @@ function App() {
         const sourceBoard = [...prev[source.droppableId]];
         const targetBoard = [...prev[destination.droppableId]];
         sourceBoard.splice(source.index, 1);
-        targetBoard.splice(destination.index, 0 ,draggableId);
+        targetBoard.splice(destination.index, 0 , {id:destination?.index, text:draggableId});
         return {
           ...prev,
           [source.droppableId]:sourceBoard,
