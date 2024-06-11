@@ -43,7 +43,7 @@ interface ITrashCanProps{
 function TrashCan({show}:ITrashCanProps){
     return(
         <>
-        <Droppable droppableId="trashBin">
+        <Droppable droppableId="trashBin" isDropDisabled={!show}>
             {(magic,snapshot) => 
             <Wrapper className="TrashBin"
                 ref={magic.innerRef}

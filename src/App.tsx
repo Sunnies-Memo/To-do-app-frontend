@@ -41,20 +41,21 @@ function App() {
   },[]);
 
   const onDragStart = (info:DragStart) => {
+    setShowTrashCan(true);
     if(info.source.droppableId !== "boards") {
-        setShowTrashCan(true);
-        setBoardDrop(true);
-        setCardDrop(false);
+      //Dragging Card
+      setBoardDrop(true);
+      setCardDrop(false);
     } else {
-        setBoardDrop(false);
-        setCardDrop(true);
+      //Dragging board
+      setBoardDrop(false);
+      setCardDrop(true);
     }
   }
   const onDragEnd = (info:DropResult) => {
     const {destination, source} = info;
 
     if(!destination) {
-      console.log("destination undefined")
       setShowTrashCan(false); 
       return
     };
@@ -69,14 +70,8 @@ function App() {
         localStorage.setItem("BOARDS", JSON.stringify(boardsCopy));
         return boardsCopy;
       })
-      return
-    }else if (source.droppableId === "boards") {
-      return
-    }
-
-    if(destination?.droppableId === source.droppableId){
-      console.log("same board")
-      //same board movement
+    } else if (destination.droppableId === source.droppableId){
+      //card same board movement
       setToDos(prev => {
         const boardCopy = [...prev[source.droppableId]];
         const taskObj = boardCopy[source.index];
@@ -92,20 +87,28 @@ function App() {
     }
 
     if(destination.droppableId === "trashBin"){
-      console.log("cross board")
-      //Deleting ToDo
-      setToDos(prev => {
-        const boardCopy = [...prev[source.droppableId]];
-        boardCopy.splice(source.index, 1);
-        const newToDoObj = {
-          ...prev,
-          [source.droppableId]:boardCopy
-        }
-        localStorage.setItem("TODO",JSON.stringify(newToDoObj));
-        return newToDoObj;
-      })
+      if(source.droppableId === "boards"){
+        setBoards(prev => {
+          const boardsCopy = [...prev];
+          boardsCopy.splice(source.index, 1);
+          localStorage.setItem("BOARDS", JSON.stringify(boardsCopy))
+          return boardsCopy
+        })
+      } else {
+        //Deleting card
+        setToDos(prev => {
+          const boardCopy = [...prev[source.droppableId]];
+          boardCopy.splice(source.index, 1);
+          const newToDoObj = {
+            ...prev,
+            [source.droppableId]:boardCopy
+          }
+          localStorage.setItem("TODO",JSON.stringify(newToDoObj));
+          return newToDoObj;
+        })
+      }
     } else if(destination.droppableId !== source.droppableId){
-      //Cross board movement
+      //card Cross board movement
       setToDos(prev => {
         const sourceBoard = [...prev[source.droppableId]];
         const targetBoard = [...prev[destination.droppableId]];
