@@ -3,7 +3,8 @@ import DragableCard from "./DragableCard";
 import React, { useRef } from "react";
 import { styled } from "styled-components";
 import { useForm } from "react-hook-form";
-import { ITodo } from "../atoms";
+import { ITodo, toDoState } from "../atoms";
+import { useSetRecoilState } from "recoil";
 
 interface IAreaProps{
     isDraggingOver:boolean;
@@ -49,8 +50,19 @@ interface IForm{
     toDo:string
 }
 function Board({toDos,boardId}:IBoardProps){
-    const {register,handleSubmit,setValue} = useForm();
+    const {register,handleSubmit,setValue} = useForm<IForm>();
+    const setToDos = useSetRecoilState(toDoState);
     const onValid = ({toDo}:IForm) => {
+        const newToDo:ITodo = {
+            id:Date.now(),
+            text:toDo
+        };
+        setToDos(prev => {
+            return {
+                ...prev,
+                [boardId]:[newToDo,...prev[boardId]]
+            };
+        });
         setValue("toDo","");
     };
     return(
