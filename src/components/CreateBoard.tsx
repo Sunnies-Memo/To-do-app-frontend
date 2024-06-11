@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { toDoState } from "../atoms";
+import { boardState, toDoState } from "../atoms";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -64,12 +64,18 @@ interface IBoardForm{
 function BoardForm(){
     const [ showForm, setShowForm ] = useState(false);
     const setToDoState = useSetRecoilState(toDoState);
+    const setBoards = useSetRecoilState(boardState);
     const { handleSubmit, register } = useForm<IBoardForm>()
     const onValid = ({boardName}:IBoardForm) => {
         setToDoState(prev => {
             return {...prev,
             [boardName]:[]
             }
+        })
+        setBoards(prev => {
+            const newBoards = [...prev, boardName]
+            localStorage.setItem("BOARDS",JSON.stringify(newBoards));
+            return newBoards;
         })
     }
 

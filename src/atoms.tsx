@@ -5,15 +5,25 @@ export interface ITodo {
     text:string
 }
 
-interface IToDoState{
+export interface IToDoState{
     [key:string]: ITodo[];
 }
 
 export const toDoState = atom<IToDoState>({
     key:"toDo",
     default:{
-        to_do: [],
-        doing: [],
-        done: [],
+        "to do": [],
+        "doing": [],
+        "done": [],
     },
 });
+
+export const boardState = atom({
+    key:"boards",
+    default:["to do", "doing", "done"]
+})
+
+export const cardDrop = atom({
+    key:"cardDrop",
+    default:false
+})
