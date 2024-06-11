@@ -1,9 +1,10 @@
-import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { useRecoilState } from "recoil";
 import styled  from "styled-components";
 import { toDoState } from "./atoms";
 import Board from "./components/Board";
 import TrashCan from "./components/TrashBin";
+import { useState } from "react";
 
 const Wrapper = styled.div`
   display: flex;
@@ -13,25 +14,33 @@ const Wrapper = styled.div`
   align-items: center;
   height: 100vh;
   position: relative;
-`
+  `
 const Boards = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   gap: 10px;
-`
+  `
 
 
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
+  const [showTrashCan, setShowTrashCan] = useState(false);
+  const onDragStart = () => {
+    setShowTrashCan(true)
+  }
   const onDragEnd = (info:DropResult) => {
-    console.log(info);
-    console.log(info.destination);
+    console.log(info)
     const {destination, source} = info;
-    if(!destination) return;
+    if(!destination) {
+      console.log("destination undefined")
+      setShowTrashCan(false); 
+      return
+    };
     if(destination?.droppableId === source.droppableId){
+      console.log("same board")
       //same board movement
       setToDos(prev => {
         const boardCopy = [...prev[source.droppableId]];
@@ -45,6 +54,7 @@ function App() {
       })
     }
     if(destination.droppableId === "trashBin"){
+      console.log("cross board")
       //Deleting ToDo
       setToDos(prev => {
         const boardCopy = [...prev[source.droppableId]];
@@ -69,19 +79,24 @@ function App() {
         }
       })
     }
-
+    setShowTrashCan(false);
   }
-    return (
-    <>
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Wrapper className="wrapper">
-        <Boards className="boards">
-         {Object.keys(toDos).map(boardId => <Board boardId={boardId} key={boardId} toDos={toDos[boardId]}/>)}
-        </Boards>
-        <TrashCan/>
-      </Wrapper>
-    </DragDropContext>
-    </>
+  
+  return (
+  <>
+  <DragDropContext 
+    onDragStart={onDragStart}
+
+    onDragEnd={onDragEnd}
+  >
+    <Wrapper className="wrapper">
+      <Boards className="boards">
+        {Object.keys(toDos).map(boardId => <Board boardId={boardId} key={boardId} toDos={toDos[boardId]}/>)}
+      </Boards>
+      <TrashCan show={showTrashCan}/>
+    </Wrapper>
+  </DragDropContext>
+  </>
   );
 }
 

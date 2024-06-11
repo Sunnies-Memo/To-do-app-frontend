@@ -5,34 +5,59 @@ import { TrashBin } from "../assets/Icons";
 interface IDeleteTodoBox{
     isDraggingOver:boolean;
 }
-const DeleteToDoBox = styled.div<IDeleteTodoBox>`
-  position: fixed;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 40px;
-  height: 40px;
-  background-color: ${props => props.theme.boardColor};
-  border-radius: 5px;
-  bottom: 15px;
-  svg{
-    fill: ${props=>props.isDraggingOver? "red" : "dimgray"};
-    width: 20px;
-  }
+interface IWrapper{
+    show:boolean;
+}
+const Wrapper = styled.div`
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    height: 120px;
+    background-color: transparent;
+    bottom: 15px;
 `
-function TrashCan(){
+const TrashCanWrapper = styled.div<IWrapper>`
+    display: ${props=>props.show? "flex" : "none"};
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+`
+const DeleteToDoBox = styled.div<IDeleteTodoBox>`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: ${props => props.theme.boardColor};
+    border-radius: 5px;
+    svg{
+        fill: ${props=>props.isDraggingOver? "red" : "dimgray"};
+        width: 20px;
+    }
+`
+interface ITrashCanProps{
+    show:boolean
+}
+function TrashCan({show}:ITrashCanProps){
     return(
         <>
         <Droppable droppableId="trashBin">
             {(magic,snapshot) => 
-            <DeleteToDoBox
+            <Wrapper className="TrashBin"
                 ref={magic.innerRef}
                 {...magic.droppableProps}
-                isDraggingOver={snapshot.isDraggingOver}
             >
+                <TrashCanWrapper show={show}>
+                    <DeleteToDoBox
+                        isDraggingOver={snapshot.isDraggingOver}
+                    >
+                        <TrashBin/>
+                    </DeleteToDoBox>
+                </TrashCanWrapper>
                 {magic.placeholder}
-                <TrashBin/>
-            </DeleteToDoBox>
+            </Wrapper>
             }
         </Droppable>
         </>
