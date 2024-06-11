@@ -12,7 +12,7 @@ interface IAreaProps{
 }
 
 const Area = styled.div<IAreaProps>`
-    background-color: ${props => props.isDraggingOver? "blue" : props.isDraggingFromThis? "red" : "#A6A6A6"};
+    background-color: ${props => props.isDraggingOver? "#62A6DE" : props.isDraggingFromThis? "#878787" : "#A6A6A6"};
     width: 95%;
     flex-grow: 1;
     transition: background-color .3s ease-in-out;
