@@ -10,7 +10,7 @@ const Wrapper = styled(motion.div)`
     display: flex;
     justify-content: center;
     top: 15px;
-    width: 300px;
+    width: 260px;
     height: 30px;
     overflow: visible;
 `
@@ -29,14 +29,40 @@ const Bar = styled.div`
 const Form = styled(motion.form)`
     position: absolute;
     bottom: -70px;
-    width: 280px;
-    height: 80px;
+    width: 250px;
     background-color: ${props => props.theme.boardColor};
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     border-radius: 5px;
+    padding: 8px;
+    div{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 5px;
+    }
+    input{
+        width: 80%;
+        height: 25px;
+        border: none;
+        border-radius: 3px;
+        padding: 0 5px 0 5px;
+        box-shadow: rgba(99, 99, 99, 0.3) inset 1px 1px 2px 0px;
+        text-align: center;
+    }
+    button{
+        height: 23px;
+        padding: 3px;
+        background-color: #A6A6A6;
+        border: none;
+        border-radius: 3px;
+        margin-left: 5px;
+    }
+    button:hover{
+        cursor: pointer;
+    }
 `
 const formVarients = {
     start:{
@@ -65,7 +91,7 @@ function BoardForm(){
     const [ showForm, setShowForm ] = useState(false);
     const setToDoState = useSetRecoilState(toDoState);
     const setBoards = useSetRecoilState(boardState);
-    const { handleSubmit, register } = useForm<IBoardForm>()
+    const { handleSubmit, register, setValue } = useForm<IBoardForm>()
     const onValid = ({boardName}:IBoardForm) => {
         setToDoState(prev => {
             return {...prev,
@@ -77,6 +103,7 @@ function BoardForm(){
             localStorage.setItem("BOARDS",JSON.stringify(newBoards));
             return newBoards;
         })
+        setValue("boardName","")
     }
 
     return(
@@ -98,12 +125,14 @@ function BoardForm(){
                         exit={"start"}
                     >
                         <Title><span>Create New Board</span></Title>
-                        <input 
-                            type="text" 
-                            {...register("boardName",{required:true})} 
-                            placeholder="Board Name..."
-                        />
-                        <button>Create</button>
+                        <div>
+                            <input 
+                                type="text" 
+                                {...register("boardName",{required:true})} 
+                                placeholder="Board Name..."
+                            />
+                            <button>Create</button>
+                        </div>
                     </Form>
                     :
                     null    

@@ -88,11 +88,18 @@ function App() {
 
     if(destination.droppableId === "trashBin"){
       if(source.droppableId === "boards"){
+        //deleteing board
         setBoards(prev => {
           const boardsCopy = [...prev];
           boardsCopy.splice(source.index, 1);
           localStorage.setItem("BOARDS", JSON.stringify(boardsCopy))
           return boardsCopy
+        })
+        setToDos(prev => {
+          const newObj = {...prev};
+          delete newObj[boards[source.index]];
+          localStorage.setItem("TODO",JSON.stringify(newObj));
+          return newObj;
         })
       } else {
         //Deleting card

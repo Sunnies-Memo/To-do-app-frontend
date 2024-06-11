@@ -12,17 +12,18 @@ interface IAreaProps{
 }
 
 const Area = styled.div<IAreaProps>`
-    background-color: ${props => props.isDraggingOver? "blue" : props.isDraggingFromThis? "red" : "dimgray"};
+    background-color: ${props => props.isDraggingOver? "blue" : props.isDraggingFromThis? "red" : "#A6A6A6"};
+    width: 95%;
     flex-grow: 1;
     transition: background-color .3s ease-in-out;
-    padding: 10px;
+    padding: 7px 10px 5px 10px;
     border-radius: 5px;
 `
 const Title = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 5px;
+    margin-top: 4px;
     span{
         font-size: 15px;
         font-weight: bold;
@@ -36,10 +37,18 @@ const Wrapper = styled.div`
     min-height: 200px;
     display: flex;
     flex-direction: column;
+    align-items: center;
 `
 const Form = styled.form`
+    width: 93%;
+    margin: 10px 0 10px 0;
     input{
         width: 100%;
+        height: 25px;
+        border: none;
+        border-radius: 3px;
+        padding: 0 5px 0 5px;
+        box-shadow: rgba(99, 99, 99, 0.3) inset 1px 1px 2px 0px;
     }
 `
 interface IBoardProps{
