@@ -58,10 +58,12 @@ function Board({toDos,boardId}:IBoardProps){
             text:toDo
         };
         setToDos(prev => {
-            return {
+            const newToDoObj = {
                 ...prev,
                 [boardId]:[newToDo,...prev[boardId]]
-            };
+            }
+            localStorage.setItem("TODO",JSON.stringify(newToDoObj))
+            return newToDoObj;
         });
         setValue("toDo","");
     };

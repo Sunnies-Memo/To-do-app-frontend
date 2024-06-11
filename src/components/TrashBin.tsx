@@ -13,8 +13,8 @@ const Wrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 80px;
     background-color: transparent;
     bottom: 15px;
 `

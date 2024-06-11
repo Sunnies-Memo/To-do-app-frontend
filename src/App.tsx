@@ -4,7 +4,8 @@ import styled  from "styled-components";
 import { toDoState } from "./atoms";
 import Board from "./components/Board";
 import TrashCan from "./components/TrashBin";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import BoardForm from "./components/CreateBoard";
 
 const Wrapper = styled.div`
   display: flex;
@@ -28,6 +29,12 @@ const Boards = styled.div`
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
   const [showTrashCan, setShowTrashCan] = useState(false);
+
+  useEffect(()=>{
+    const storedToDo = localStorage.getItem("TODO");
+    storedToDo && setToDos(JSON.parse(storedToDo));
+  },[]);
+
   const onDragStart = () => {
     setShowTrashCan(true)
   }
@@ -47,10 +54,12 @@ function App() {
         const taskObj = boardCopy[source.index];
         boardCopy.splice(source.index, 1);
         boardCopy.splice(destination?.index, 0, taskObj);
-        return {
+        const newToDoObj = {
           ...prev,
           [source.droppableId]:boardCopy
         }
+        localStorage.setItem("TODO",JSON.stringify(newToDoObj))
+        return newToDoObj;
       })
     }
     if(destination.droppableId === "trashBin"){
@@ -59,10 +68,12 @@ function App() {
       setToDos(prev => {
         const boardCopy = [...prev[source.droppableId]];
         boardCopy.splice(source.index, 1);
-        return {
+        const newToDoObj = {
           ...prev,
           [source.droppableId]:boardCopy
         }
+        localStorage.setItem("TODO",JSON.stringify(newToDoObj));
+        return newToDoObj;
       })
     } else if(destination.droppableId !== source.droppableId){
       //Cross board movement
@@ -72,11 +83,13 @@ function App() {
         const taskObj = sourceBoard[source.index];
         sourceBoard.splice(source.index, 1);
         targetBoard.splice(destination.index, 0 , taskObj);
-        return {
+        const newToDoObj = {
           ...prev,
           [source.droppableId]:sourceBoard,
           [destination.droppableId]:targetBoard,
         }
+        localStorage.setItem("TODO",JSON.stringify(newToDoObj));
+        return newToDoObj;
       })
     }
     setShowTrashCan(false);
@@ -90,6 +103,7 @@ function App() {
     onDragEnd={onDragEnd}
   >
     <Wrapper className="wrapper">
+      <BoardForm/>
       <Boards className="boards">
         {Object.keys(toDos).map(boardId => <Board boardId={boardId} key={boardId} toDos={toDos[boardId]}/>)}
       </Boards>

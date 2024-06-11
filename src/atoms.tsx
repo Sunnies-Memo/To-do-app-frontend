@@ -1,4 +1,4 @@
-import { atom} from "recoil";
+import { atom } from "recoil";
 
 export interface ITodo {
     id:number;
@@ -16,4 +16,4 @@ export const toDoState = atom<IToDoState>({
         doing: [],
         done: [],
     },
-})
+});
