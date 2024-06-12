@@ -38,6 +38,7 @@ function App() {
     storedToDo && setToDos(JSON.parse(storedToDo));
     const storedBoards= localStorage.getItem("BOARDS");
     storedBoards && setBoards(JSON.parse(storedBoards));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
   const onDragStart = (info:DragStart) => {
