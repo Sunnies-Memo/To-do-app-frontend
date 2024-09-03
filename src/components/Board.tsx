@@ -65,6 +65,8 @@ interface IForm {
   toDo: string;
 }
 function Board({ index, toDos, boardId }: IBoardProps) {
+  console.log("board", boardId);
+  console.log("todos", toDos);
   const { register, handleSubmit, setValue } = useForm<IForm>();
   const isCardDrop = useRecoilValue(cardDrop);
   const setToDos = useSetRecoilState(toDoState);
@@ -83,6 +85,7 @@ function Board({ index, toDos, boardId }: IBoardProps) {
     });
     setValue("toDo", "");
   };
+  console.log("draggableId", boardId);
   return (
     <Draggable key={boardId} draggableId={boardId} index={index}>
       {(magic) => (

@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
+import { StrictModeDroppable } from "../util";
 
 const Wrapper = styled.div`
   display: flex;
@@ -144,7 +145,7 @@ export default function TodosPage() {
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Wrapper className="wrapper">
           <BoardForm />
-          <Droppable
+          <StrictModeDroppable
             droppableId="boards"
             direction="horizontal"
             isDropDisabled={boardDrop}
@@ -166,7 +167,7 @@ export default function TodosPage() {
                 {magic.placeholder}
               </Boards>
             )}
-          </Droppable>
+          </StrictModeDroppable>
           <TrashCan show={showTrashCan} />
         </Wrapper>
       </DragDropContext>
