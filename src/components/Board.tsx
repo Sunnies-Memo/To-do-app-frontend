@@ -29,6 +29,7 @@ const Title = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: 4px;
+  width: 100%;
   span {
     font-size: 15px;
     font-weight: bold;
