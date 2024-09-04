@@ -44,7 +44,7 @@ export function useAuth() {
       const token = "token";
       return token;
     } else {
-      navigate("/login");
+      // navigate("/login");
       return null;
     }
   }, [isAuthed, navigate]);

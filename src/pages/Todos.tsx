@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
-import { StrictModeDroppable } from "../util";
-import { IToDoState } from "../interface/todo-interface";
+import { StrictModeDroppable, useAuth } from "../util";
+import { IBoard, IToDoState } from "../interface/todo-interface";
+import { useQuery } from "@tanstack/react-query";
+import { getBoards } from "../api/todo-api";
 
 const Wrapper = styled.div`
   display: flex;
@@ -27,6 +29,15 @@ const Boards = styled.div`
 `;
 
 export default function TodosPage() {
+  const isLogin = useAuth();
+  const { data, isLoading } = useQuery({
+    queryKey: ["boards"],
+    queryFn: () => {
+      const token = isLogin();
+      if (token !== null) return getBoards(token);
+    },
+  });
+
   const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
   const [boards, setBoards] = useRecoilState<string[]>(boardState);
   const setCardDrop = useSetRecoilState(cardDrop);
@@ -39,6 +50,12 @@ export default function TodosPage() {
     const storedBoards = localStorage.getItem("BOARDS");
     storedBoards && setBoards(JSON.parse(storedBoards));
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    data.forEach((board: IBoard) => {
+      setBoards();
+    });
   }, []);
 
   const onDragStart = (info: DragStart) => {

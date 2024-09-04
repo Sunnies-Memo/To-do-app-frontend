@@ -16,7 +16,7 @@ const Card = styled.div<ICardProps>`
 `;
 
 interface IDragalbeCard {
-  toDoId: number;
+  toDoId?: number;
   toDoText: string;
   index: number;
 }

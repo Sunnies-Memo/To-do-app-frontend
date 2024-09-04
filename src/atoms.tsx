@@ -10,9 +10,13 @@ export const toDoState = atom<IToDoState>({
   },
 });
 
-export const boardState = atom({
+// export const boardState = atom({
+//   key: "boards",
+//   default: ["to do", "doing", "done"],
+// });
+export const boardState = atom<string[]>({
   key: "boards",
-  default: ["to do", "doing", "done"],
+  default: [],
 });
 
 export const cardDrop = atom({
