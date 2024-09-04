@@ -1,6 +1,6 @@
-import { Droppable } from "react-beautiful-dnd";
 import { styled } from "styled-components";
 import { TrashBin } from "../assets/Icons";
+import { StrictModeDroppable } from "../util";
 
 interface IDeleteTodoBox {
   isDraggingOver: boolean;
@@ -43,7 +43,7 @@ interface ITrashCanProps {
 function TrashCan({ show }: ITrashCanProps) {
   return (
     <>
-      <Droppable droppableId="trashBin" isDropDisabled={!show}>
+      <StrictModeDroppable droppableId="trashBin" isDropDisabled={!show}>
         {(magic, snapshot) => (
           <Wrapper
             className="TrashBin"
@@ -58,7 +58,7 @@ function TrashCan({ show }: ITrashCanProps) {
             {magic.placeholder}
           </Wrapper>
         )}
-      </Droppable>
+      </StrictModeDroppable>
     </>
   );
 }

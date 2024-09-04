@@ -1,29 +1,31 @@
-import { atom } from "recoil";
-
-export interface ITodo {
-    id:number;
-    text:string
-}
-
-export interface IToDoState{
-    [key:string]: ITodo[];
-}
+import { atom, selector } from "recoil";
+import { IToDoState } from "./interface/todo-interface";
 
 export const toDoState = atom<IToDoState>({
-    key:"toDo",
-    default:{
-        "to do": [],
-        "doing": [],
-        "done": [],
-    },
+  key: "toDo",
+  default: {
+    "to do": [],
+    doing: [],
+    done: [],
+  },
 });
 
 export const boardState = atom({
-    key:"boards",
-    default:["to do", "doing", "done"]
-})
+  key: "boards",
+  default: ["to do", "doing", "done"],
+});
 
 export const cardDrop = atom({
-    key:"cardDrop",
-    default:false
-})
+  key: "cardDrop",
+  default: false,
+});
+
+export const isAuthenticated = atom({
+  key: "isAuthenticated",
+  default: false,
+});
+
+export const userProfileSelector = selector({
+  key: "userProfileSelector",
+  get: () => {},
+});

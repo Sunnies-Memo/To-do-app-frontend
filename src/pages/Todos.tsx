@@ -1,17 +1,13 @@
-import {
-  DragDropContext,
-  DragStart,
-  DropResult,
-  Droppable,
-} from "react-beautiful-dnd";
+import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { boardState, cardDrop, IToDoState, toDoState } from "../atoms";
+import { boardState, cardDrop, toDoState } from "../atoms";
 import { useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
 import { StrictModeDroppable } from "../util";
+import { IToDoState } from "../interface/todo-interface";
 
 const Wrapper = styled.div`
   display: flex;
@@ -92,6 +88,7 @@ export default function TodosPage() {
     }
 
     if (destination.droppableId === "trashBin") {
+      console.log("trasshbin");
       if (source.droppableId === "boards") {
         //deleteing board
         setBoards((prev) => {
