@@ -61,13 +61,14 @@ const Form = styled.form`
 interface IBoardProps {
   index: number;
   toDos: ITodo[];
-  boardId: string;
+  boardTitle: string;
+  boardId: number;
 }
 interface IForm {
   toDo: string;
 }
-function Board({ index, toDos, boardId }: IBoardProps) {
-  console.log("board", boardId);
+function Board({ index, toDos, boardTitle, boardId }: IBoardProps) {
+  console.log("board", boardTitle);
   console.log("todos", toDos);
   const { register, handleSubmit, setValue } = useForm<IForm>();
   const isCardDrop = useRecoilValue(cardDrop);
@@ -80,29 +81,29 @@ function Board({ index, toDos, boardId }: IBoardProps) {
     setToDos((prev) => {
       const newToDoObj = {
         ...prev,
-        [boardId]: [newToDo, ...prev[boardId]],
+        [boardTitle]: [newToDo, ...prev[boardTitle]],
       };
       localStorage.setItem("TODO", JSON.stringify(newToDoObj));
       return newToDoObj;
     });
     setValue("toDo", "");
   };
-  console.log("draggableId", boardId);
+  console.log("draggableId", boardTitle);
   return (
-    <Draggable key={boardId} draggableId={boardId} index={index}>
+    <Draggable key={boardId} draggableId={boardTitle} index={index}>
       {(magic) => (
         <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
           <Title {...magic.dragHandleProps}>
-            <span>{boardId}</span>
+            <span>{boardTitle}</span>
           </Title>
           <Form onSubmit={handleSubmit(onValid)}>
             <input
               {...register("toDo", { required: true })}
               type="text"
-              placeholder={`Add task on ${boardId}`}
+              placeholder={`Add task on ${boardTitle}`}
             />
           </Form>
-          <Droppable droppableId={boardId} isDropDisabled={isCardDrop}>
+          <Droppable droppableId={boardId + ""} isDropDisabled={isCardDrop}>
             {(magic, snapshot) => (
               <Area
                 ref={magic.innerRef}

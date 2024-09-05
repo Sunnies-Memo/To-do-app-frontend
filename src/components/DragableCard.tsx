@@ -22,7 +22,7 @@ interface IDragalbeCard {
 }
 function DragableCard({ toDoId, toDoText, index }: IDragalbeCard) {
   return (
-    <Draggable key={toDoId} draggableId={toDoId + ""} index={index}>
+    <Draggable key={toDoId} draggableId={"todoCard" + toDoId} index={index}>
       {(magic, snapshot) => (
         <Card
           isDragging={snapshot.isDragging}
