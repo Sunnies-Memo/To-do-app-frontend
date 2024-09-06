@@ -16,5 +16,9 @@ export interface IBoard extends IBoardUpdate {
 export interface IBoardUpdate {
   title: string;
   boardId?: number;
-  orderIndex?: number;
+  orderIndex: number;
+}
+
+export interface IBoardForm {
+  title: string;
 }

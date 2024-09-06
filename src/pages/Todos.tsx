@@ -2,7 +2,7 @@ import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, toDoState } from "../atoms";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
@@ -35,9 +35,11 @@ const Boards = styled.div`
 
 export default function TodosPage() {
   const isLogin = useAuth();
-
   const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
   const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
+
+  const [lastBIndex, setLastBIndex] = useState(100);
+
   const setCardDrop = useSetRecoilState(cardDrop);
   const [boardDrop, setBoardDrop] = useState(false);
   const [showTrashCan, setShowTrashCan] = useState(false);
@@ -84,6 +86,11 @@ export default function TodosPage() {
     console.log("fetching");
     fetchData();
   }, []);
+  useEffect(() => {
+    setLastBIndex((prev) => {
+      return boards[boards.length - 1].orderIndex;
+    });
+  }, [boards]);
 
   console.log("todo", toDos);
 
@@ -249,7 +256,9 @@ export default function TodosPage() {
     <>
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Wrapper className="wrapper">
-          <BoardForm />
+          <Suspense fallback={<div>Loading...</div>}>
+            <BoardForm lastBoardIndex={lastBIndex} />
+          </Suspense>
           <StrictModeDroppable
             droppableId="boards"
             direction="horizontal"
@@ -264,8 +273,7 @@ export default function TodosPage() {
                 {boards.map((board, index) => (
                   <Board
                     index={index}
-                    boardId={board.boardId ? board.boardId : -1}
-                    boardTitle={board.title}
+                    board={board}
                     key={board.title}
                     toDos={toDos[board.title]}
                   />

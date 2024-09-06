@@ -4,8 +4,10 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import DragableCard from "./DragableCard";
-import React from "react";
-import { ITodo } from "../interface/todo-interface";
+import React, { useEffect, useRef } from "react";
+import { IBoard, ITodo } from "../interface/todo-interface";
+import { useAuth } from "../util";
+import { createToDo } from "../api/todo-api";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -61,49 +63,66 @@ const Form = styled.form`
 interface IBoardProps {
   index: number;
   toDos: ITodo[];
-  boardTitle: string;
-  boardId: number;
+  board: IBoard;
 }
-interface IForm {
-  toDo: string;
-}
-function Board({ index, toDos, boardTitle, boardId }: IBoardProps) {
-  console.log("board", boardTitle);
+
+function Board({ index, toDos, board }: IBoardProps) {
+  console.log("board", board.title);
   console.log("todos", toDos);
-  const { register, handleSubmit, setValue } = useForm<IForm>();
+  const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
   const setToDos = useSetRecoilState(toDoState);
-  const onValid = ({ toDo }: IForm) => {
+  const isLogin = useAuth();
+
+  const lastIndexRef = useRef(100);
+  useEffect(() => {
+    const lastIndex = toDos[toDos.length - 1].orderIndex;
+    lastIndexRef.current = lastIndex ? lastIndex : 100;
+  }, [toDos]);
+
+  const onValid = async (todo: ITodo) => {
+    const token = isLogin();
+    if (!token) return;
     const newToDo: ITodo = {
-      id: Date.now(),
-      text: toDo,
+      text: todo.text,
+      orderIndex: lastIndexRef.current + 10,
+      board: board,
     };
-    setToDos((prev) => {
-      const newToDoObj = {
-        ...prev,
-        [boardTitle]: [newToDo, ...prev[boardTitle]],
-      };
-      localStorage.setItem("TODO", JSON.stringify(newToDoObj));
-      return newToDoObj;
-    });
-    setValue("toDo", "");
+    try {
+      await createToDo(newToDo, token);
+      setToDos((prev) => {
+        const newToDoObj = {
+          ...prev,
+          [board.title]: [newToDo, ...prev[board.title]],
+        };
+        localStorage.setItem("TODO", JSON.stringify(newToDoObj));
+        return newToDoObj;
+      });
+      setValue("text", "");
+    } catch {
+      return;
+    }
   };
-  console.log("draggableId", boardTitle);
+
+  console.log("draggableId", board.title);
   return (
-    <Draggable key={boardId} draggableId={boardTitle} index={index}>
+    <Draggable key={board.boardId} draggableId={board.title} index={index}>
       {(magic) => (
         <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
           <Title {...magic.dragHandleProps}>
-            <span>{boardTitle}</span>
+            <span>{board.title}</span>
           </Title>
           <Form onSubmit={handleSubmit(onValid)}>
             <input
-              {...register("toDo", { required: true })}
+              {...register("text", { required: true })}
               type="text"
-              placeholder={`Add task on ${boardTitle}`}
+              placeholder={`Add task on ${board.title}`}
             />
           </Form>
-          <Droppable droppableId={boardId + ""} isDropDisabled={isCardDrop}>
+          <Droppable
+            droppableId={board.boardId + ""}
+            isDropDisabled={isCardDrop}
+          >
             {(magic, snapshot) => (
               <Area
                 ref={magic.innerRef}
