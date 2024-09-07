@@ -21,6 +21,7 @@ interface IDragalbeCard {
   index: number;
 }
 function DragableCard({ toDoId, toDoText, index }: IDragalbeCard) {
+  console.log("draggableCard : " + toDoId);
   return (
     <Draggable key={toDoId} draggableId={"todoCard" + toDoId} index={index}>
       {(magic, snapshot) => (

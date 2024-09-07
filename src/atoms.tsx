@@ -28,12 +28,35 @@ export const cardDrop = atom({
   default: false,
 });
 
-export const isAuthenticated = atom({
+export const lastBoardIndex = atom<number>({
+  key: "lastBIndex",
+  default: 100,
+});
+
+//유저 관련s
+export const userState = atom({
+  key: "userState",
+  default: {
+    memberId: 1,
+    username: "",
+  },
+});
+
+export const userToken = atom({
+  key: "token",
+  default: "token",
+});
+
+export const isAuthenticated = selector({
   key: "isAuthenticated",
-  default: true,
+  get: ({ get }) => {
+    const data = get(userState);
+    if (data.memberId !== null) return true;
+    else return false;
+  },
 });
 
 export const userProfileSelector = selector({
   key: "userProfileSelector",
-  get: () => {},
+  get: async () => {},
 });

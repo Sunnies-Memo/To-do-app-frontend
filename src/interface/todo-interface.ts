@@ -1,5 +1,5 @@
 export interface ITodo {
-  id?: number;
+  todoId?: number;
   text: string;
   orderIndex?: number;
   board?: IBoard;
@@ -17,6 +17,7 @@ export interface IBoardUpdate {
   title: string;
   boardId?: number;
   orderIndex: number;
+  memberId: number;
 }
 
 export interface IBoardForm {

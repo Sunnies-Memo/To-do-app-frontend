@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { boardState, toDoState } from "../atoms";
+import { boardState, lastBoardIndex, toDoState, userState } from "../atoms";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IBoardForm, IBoardUpdate } from "../interface/todo-interface";
@@ -88,18 +88,23 @@ const Title = styled.div`
   }
 `;
 
-function BoardForm({ lastBoardIndex }: { lastBoardIndex: number }) {
-  const [showForm, setShowForm] = useState(false);
-  const setToDoState = useSetRecoilState(toDoState);
-  const setBoards = useSetRecoilState(boardState);
-  const { handleSubmit, register, setValue } = useForm<IBoardForm>();
+function BoardForm() {
   const isLogin = useAuth();
+  const userData = useRecoilValue(userState);
+
+  const lastBIndex = useRecoilValue(lastBoardIndex);
+  const [showForm, setShowForm] = useState(false);
+  const setBoards = useSetRecoilState(boardState);
+  const setToDoState = useSetRecoilState(toDoState);
+  const { handleSubmit, register, setValue } = useForm<IBoardForm>();
+
   const onValid = async ({ title }: IBoardForm) => {
     const token = isLogin();
     if (!token) return;
     const newBoard = {
       title: title,
-      orderIndex: lastBoardIndex + 10,
+      orderIndex: lastBIndex + 10,
+      memberId: userData.memberId,
     };
     try {
       await createBoard(newBoard, token);

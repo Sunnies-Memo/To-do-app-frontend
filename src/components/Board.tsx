@@ -67,8 +67,7 @@ interface IBoardProps {
 }
 
 function Board({ index, toDos, board }: IBoardProps) {
-  console.log("board", board.title);
-  console.log("todos", toDos);
+  console.log("in Board " + board.boardId + " toDos", toDos);
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
   const setToDos = useSetRecoilState(toDoState);
@@ -76,7 +75,7 @@ function Board({ index, toDos, board }: IBoardProps) {
 
   const lastIndexRef = useRef(100);
   useEffect(() => {
-    const lastIndex = toDos[toDos.length - 1].orderIndex;
+    const lastIndex = toDos[toDos.length - 1]?.orderIndex;
     lastIndexRef.current = lastIndex ? lastIndex : 100;
   }, [toDos]);
 
@@ -104,7 +103,6 @@ function Board({ index, toDos, board }: IBoardProps) {
     }
   };
 
-  console.log("draggableId", board.title);
   return (
     <Draggable key={board.boardId} draggableId={board.title} index={index}>
       {(magic) => (
@@ -120,8 +118,9 @@ function Board({ index, toDos, board }: IBoardProps) {
             />
           </Form>
           <Droppable
-            droppableId={board.boardId + ""}
+            droppableId={index + ""}
             isDropDisabled={isCardDrop}
+            key={board.boardId}
           >
             {(magic, snapshot) => (
               <Area
@@ -132,9 +131,9 @@ function Board({ index, toDos, board }: IBoardProps) {
               >
                 {toDos.map((todo, index) => (
                   <DragableCard
-                    key={todo.id}
+                    key={todo.todoId}
                     index={index}
-                    toDoId={todo.id}
+                    toDoId={todo.todoId}
                     toDoText={todo.text}
                   />
                 ))}

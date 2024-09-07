@@ -1,5 +1,4 @@
 import { IBoard, ITodo } from "../interface/todo-interface";
-console.log("base url asdf", process.env.REACT_APP_SERVER_API);
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
 export async function getBoards(token: string) {
@@ -8,7 +7,6 @@ export async function getBoards(token: string) {
       //   headers: { Authorization: `Bearer ${token}` },
       //   credentials: "include",
     });
-    console.log("base url", BASE_URL);
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -21,6 +19,7 @@ export async function getBoards(token: string) {
 }
 
 export async function moveBoard(board: IBoard, gap: number, token: string) {
+  console.log("moveBoard", JSON.stringify({ board: board, gap: gap }));
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -37,12 +36,13 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
     }
     return await response.json();
   } catch (error) {
-    console.error("Failed to create board:", error);
+    console.error("Failed to move board:", error);
     throw error;
   }
 }
 
 export async function createBoard(board: IBoard, token: string) {
+  console.log("createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -65,6 +65,7 @@ export async function createBoard(board: IBoard, token: string) {
 }
 
 export async function deleteBoard(boardId: number | undefined, token: string) {
+  console.log("deleteBoard");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -87,8 +88,9 @@ export async function deleteBoard(boardId: number | undefined, token: string) {
 }
 
 export async function createToDo(todo: ITodo, token: string) {
+  console.log("createToDo", JSON.stringify(todo));
   try {
-    const response = await fetch(`${BASE_URL}`, {
+    const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
         // Authorization: `Bearer ${token}`
         "Content-Type": "application/json",
@@ -109,10 +111,14 @@ export async function createToDo(todo: ITodo, token: string) {
 }
 
 export async function moveToDo(todo: ITodo, gap: number, token: string) {
+  console.log("moveToDo", JSON.stringify({ todo: todo, gap: gap }));
   try {
-    const response = await fetch(`${BASE_URL}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      credentials: "include",
+    const response = await fetch(`${BASE_URL}/todo`, {
+      headers: {
+        // Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+      },
+      //   credentials: "include",
       method: "PUT",
       body: JSON.stringify({ todo: todo, gap: gap }),
     });
@@ -128,8 +134,9 @@ export async function moveToDo(todo: ITodo, gap: number, token: string) {
 }
 
 export async function deleteToDo(todoId: number | undefined, token: string) {
+  console.log("deleteToDo", JSON.stringify(todoId));
   try {
-    const response = await fetch(`${BASE_URL}`, {
+    const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
         // Authorization: `Bearer ${token}`
         "Content-Type": "application/json",
