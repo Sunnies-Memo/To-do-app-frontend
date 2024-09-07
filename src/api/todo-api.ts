@@ -1,4 +1,4 @@
-import { IBoard, ITodo } from "../interface/todo-interface";
+import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
 export async function getBoards(token: string) {
@@ -64,7 +64,7 @@ export async function createBoard(board: IBoard, token: string) {
   }
 }
 
-export async function deleteBoard(boardId: number | undefined, token: string) {
+export async function deleteBoard(board: IBoardUpdate, token: string) {
   console.log("deleteBoard");
   try {
     const response = await fetch(`${BASE_URL}`, {
@@ -74,13 +74,12 @@ export async function deleteBoard(boardId: number | undefined, token: string) {
       },
       //   credentials: "include",
       method: "DELETE",
-      body: JSON.stringify({ boardId: boardId }),
+      body: JSON.stringify(board),
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
   } catch (error) {
     console.error("Failed to delete board:", error);
     throw error;

@@ -88,7 +88,7 @@ const Title = styled.div`
   }
 `;
 
-function BoardForm() {
+function BoardForm({ refetch }: { refetch: any }) {
   const isLogin = useAuth();
   const userData = useRecoilValue(userState);
 
@@ -113,7 +113,6 @@ function BoardForm() {
       });
       setBoards((prev) => {
         const newBoards: IBoardUpdate[] = [...prev, newBoard];
-        localStorage.setItem("BOARDS", JSON.stringify(newBoards));
         return newBoards;
       });
       setValue("title", "");
