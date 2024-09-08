@@ -104,7 +104,7 @@ function BoardForm({ refetch }: { refetch: any }) {
     if (!token) return;
     const newBoard = {
       title: title,
-      orderIndex: lastBIndex + 10,
+      orderIndex: lastBIndex + 40,
       memberId: userData.memberId,
     };
     try {

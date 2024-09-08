@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { DroppableProps, Droppable } from "react-beautiful-dnd";
-import { useRecoilState, useRecoilValue, useResetRecoilState } from "recoil";
+import { useRecoilValue, useResetRecoilState } from "recoil";
 import { isAuthenticated, userState, userToken } from "./atoms";
 import { useNavigate } from "react-router-dom";
 

@@ -2,7 +2,7 @@ import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
@@ -45,7 +45,7 @@ export default function TodosPage() {
   const [boardDrop, setBoardDrop] = useState(false);
   const [showTrashCan, setShowTrashCan] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const token = isLogin();
     if (token !== null) {
       try {
@@ -73,10 +73,11 @@ export default function TodosPage() {
         alert("데이터를 가져오지 못했습니다.");
       }
     }
-  };
+  }, [isLogin]);
   const refetch = async () => fetchData();
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (boards.length > 0) {
@@ -84,7 +85,7 @@ export default function TodosPage() {
         return boards[boards.length - 1].orderIndex;
       });
     }
-  }, [boards]);
+  }, [boards, setLastBIndex]);
 
   const onDragStart = (info: DragStart) => {
     setShowTrashCan(true);
@@ -147,7 +148,7 @@ export default function TodosPage() {
       } else {
         return;
       }
-      let gap: number = nextIndex ? nextIndex - currIndex : 2;
+      let gap: number = nextIndex ? nextIndex - currIndex : 999;
       let thisBoard: IBoard = {
         ...boards[source.index],
         orderIndex: currIndex,
@@ -165,6 +166,11 @@ export default function TodosPage() {
       });
 
       await moveBoard(thisBoard, gap, token);
+      console.log("gap : ", gap);
+      if (gap <= 3) {
+        console.log("refetch");
+        refetch();
+      }
     } else if (destination.droppableId === source.droppableId) {
       //같은 board간 이동
       //db의 todo card orderIndex 수정
@@ -223,7 +229,7 @@ export default function TodosPage() {
         return;
       }
 
-      let gap: number = nextIndex ? nextIndex - currIndex : 2;
+      let gap: number = nextIndex ? nextIndex - currIndex : 999;
       let thisTodo = {
         ...toDos[boards[Number(source.droppableId)].title][source.index],
         orderIndex: currIndex,
@@ -241,6 +247,7 @@ export default function TodosPage() {
       });
 
       await moveToDo(thisTodo, gap, token);
+      if (gap <= 3) refetch();
     }
 
     if (destination.droppableId === "trashBin") {
@@ -335,7 +342,7 @@ export default function TodosPage() {
         return;
       }
 
-      let gap: number = nextIndex ? nextIndex - currIndex : 2;
+      let gap: number = nextIndex ? nextIndex - currIndex : 999;
       let thisTodo = {
         ...toDos[boards[Number(source.droppableId)].title][source.index],
         orderIndex: currIndex,
@@ -363,6 +370,7 @@ export default function TodosPage() {
       });
 
       await moveToDo(thisTodo, gap, token);
+      if (gap <= 3) refetch();
     }
 
     setShowTrashCan(false);

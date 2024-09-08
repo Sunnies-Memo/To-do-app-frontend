@@ -1,6 +1,6 @@
 import { styled } from "styled-components";
 import { cardDrop, toDoState } from "../atoms";
-import { constSelector, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import DragableCard from "./DragableCard";
@@ -84,7 +84,7 @@ function Board({ index, toDos, board }: IBoardProps) {
     if (!token) return;
     const newToDo: ITodo = {
       text: todo.text,
-      orderIndex: lastIndexRef.current + 10,
+      orderIndex: lastIndexRef.current + 40,
       board: board,
     };
     try {
