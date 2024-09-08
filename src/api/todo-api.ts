@@ -2,6 +2,7 @@ import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
 export async function getBoards(token: string) {
+  console.log("Fetch : getBoards");
   try {
     const response = await fetch(`${BASE_URL}`, {
       //   headers: { Authorization: `Bearer ${token}` },
@@ -19,7 +20,7 @@ export async function getBoards(token: string) {
 }
 
 export async function moveBoard(board: IBoard, gap: number, token: string) {
-  console.log("moveBoard", JSON.stringify({ board: board, gap: gap }));
+  console.log("Fetch : moveBoard : " + board.title);
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -42,7 +43,7 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
 }
 
 export async function createBoard(board: IBoard, token: string) {
-  console.log("createBoard", JSON.stringify(board));
+  console.log("Fetch : createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -65,7 +66,7 @@ export async function createBoard(board: IBoard, token: string) {
 }
 
 export async function deleteBoard(board: IBoardUpdate, token: string) {
-  console.log("deleteBoard");
+  console.log("Fetch : deleteBoard");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -87,7 +88,7 @@ export async function deleteBoard(board: IBoardUpdate, token: string) {
 }
 
 export async function createToDo(todo: ITodo, token: string) {
-  console.log("createToDo", JSON.stringify(todo));
+  console.log("Fetch : createToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
@@ -110,7 +111,7 @@ export async function createToDo(todo: ITodo, token: string) {
 }
 
 export async function moveToDo(todo: ITodo, gap: number, token: string) {
-  console.log("moveToDo", JSON.stringify({ todo: todo, gap: gap }));
+  console.log("Fetch : moveToDo", JSON.stringify({ todo: todo, gap: gap }));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
@@ -133,7 +134,7 @@ export async function moveToDo(todo: ITodo, gap: number, token: string) {
 }
 
 export async function deleteToDo(todo: ITodo, token: string) {
-  console.log("deleteToDo", JSON.stringify(todo));
+  console.log("Fetch : deleteToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {

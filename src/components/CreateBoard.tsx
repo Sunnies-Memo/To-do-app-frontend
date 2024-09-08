@@ -89,6 +89,7 @@ const Title = styled.div`
 `;
 
 function BoardForm({ refetch }: { refetch: any }) {
+  console.log("rendering BoardForm");
   const isLogin = useAuth();
   const userData = useRecoilValue(userState);
 
@@ -108,7 +109,6 @@ function BoardForm({ refetch }: { refetch: any }) {
     };
     try {
       const createdBoard = await createBoard(newBoard, token);
-      console.log("createdBoard", createdBoard);
       setToDoState((prev) => {
         return { ...prev, [title]: [] };
       });

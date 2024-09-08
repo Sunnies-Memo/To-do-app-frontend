@@ -34,6 +34,7 @@ const Boards = styled.div`
 `;
 
 export default function TodosPage() {
+  console.log("rendering TodosPage");
   const isLogin = useAuth();
   const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
   const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
@@ -60,7 +61,6 @@ export default function TodosPage() {
               memberId: board.memberId,
             });
         });
-        console.log("boardlist", boardlist);
         setBoards(boardlist);
 
         const obj = toDosData.reduce<IToDoState>((acc, cur) => {
@@ -70,14 +70,12 @@ export default function TodosPage() {
 
         setToDos(obj);
       } catch (error) {
-        console.log("error", error);
         alert("데이터를 가져오지 못했습니다.");
       }
     }
   };
   const refetch = async () => fetchData();
   useEffect(() => {
-    console.log("fetching");
     fetchData();
   }, []);
   useEffect(() => {
@@ -103,8 +101,6 @@ export default function TodosPage() {
   const onDragEnd = async (info: DropResult) => {
     const { destination, source } = info;
     const token = isLogin();
-    console.log("info", info);
-    console.log("board list", boards);
 
     if (
       !token ||
@@ -142,7 +138,6 @@ export default function TodosPage() {
       }
 
       let currIndex: number;
-      console.log("prev next", prevIndex, nextIndex);
       if (prevIndex != null && nextIndex != null) {
         currIndex = Math.floor((prevIndex + nextIndex) / 2);
       } else if (prevIndex == null && nextIndex) {
@@ -166,7 +161,6 @@ export default function TodosPage() {
         };
         boardsCopy.splice(source.index, 1);
         boardsCopy.splice(destination.index, 0, taskBoard);
-        console.log("boardsCopy", boardsCopy);
         return boardsCopy;
       });
 
@@ -250,7 +244,6 @@ export default function TodosPage() {
     }
 
     if (destination.droppableId === "trashBin") {
-      console.log("trashbin");
       if (source.droppableId === "boards") {
         //board 삭제
         setBoards((prev) => {
@@ -263,27 +256,18 @@ export default function TodosPage() {
           delete newObj[boards[source.index].title];
           return newObj;
         });
-        console.log("deleteBoard", boards[source.index]);
         await deleteBoard(boards[source.index], token);
       } else {
         //todo card 삭제
         setToDos((prev) => {
-          console.log("prev", prev);
-          console.log("droppableId", source.droppableId);
           const boardCopy = [...prev[boards[Number(source.droppableId)].title]];
           boardCopy.splice(source.index, 1);
-          console.log("boardCopy", boardCopy);
           const newToDoObj = {
             ...prev,
             [boards[Number(source.droppableId)].title]: boardCopy,
           };
-          console.log("newTodoObj", newToDoObj);
           return newToDoObj;
         });
-        console.log(
-          "deleting todo",
-          toDos[boards[Number(source.droppableId)].title][source.index]
-        );
         await deleteToDo(
           toDos[boards[Number(source.droppableId)].title][source.index],
           token

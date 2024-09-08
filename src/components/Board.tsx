@@ -67,8 +67,7 @@ interface IBoardProps {
 }
 
 function Board({ index, toDos, board }: IBoardProps) {
-  console.log("in Board " + board.boardId + " toDos", toDos);
-  console.log("in board ", board);
+  console.log("rendering Board : " + board.title);
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
   const setToDos = useSetRecoilState(toDoState);
@@ -82,7 +81,6 @@ function Board({ index, toDos, board }: IBoardProps) {
 
   const onValid = async (todo: ITodo) => {
     const token = isLogin();
-    console.log("lastIndex", lastIndexRef.current);
     if (!token) return;
     const newToDo: ITodo = {
       text: todo.text,
@@ -91,7 +89,6 @@ function Board({ index, toDos, board }: IBoardProps) {
     };
     try {
       const createdToDo = await createToDo(newToDo, token);
-      console.log("createdToDo", createdToDo);
       setToDos((prev) => {
         const newToDoObj = {
           ...prev,
@@ -132,7 +129,6 @@ function Board({ index, toDos, board }: IBoardProps) {
                 isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
               >
                 {toDos.map((todo, index) => {
-                  console.log("rendering todo", todo);
                   return (
                     <DragableCard
                       key={todo.todoId}
