@@ -268,15 +268,26 @@ export default function TodosPage() {
       } else {
         //todo card 삭제
         setToDos((prev) => {
-          const boardCopy = [...prev[source.droppableId]];
+          console.log("prev", prev);
+          console.log("droppableId", source.droppableId);
+          const boardCopy = [...prev[boards[Number(source.droppableId)].title]];
           boardCopy.splice(source.index, 1);
+          console.log("boardCopy", boardCopy);
           const newToDoObj = {
             ...prev,
-            [source.droppableId]: boardCopy,
+            [boards[Number(source.droppableId)].title]: boardCopy,
           };
+          console.log("newTodoObj", newToDoObj);
           return newToDoObj;
         });
-        await deleteToDo(toDos[source.droppableId][source.index].todoId, token);
+        console.log(
+          "deleting todo",
+          toDos[boards[Number(source.droppableId)].title][source.index]
+        );
+        await deleteToDo(
+          toDos[boards[Number(source.droppableId)].title][source.index],
+          token
+        );
       }
     } else if (destination.droppableId !== source.droppableId) {
       //card Cross board movement
@@ -391,14 +402,17 @@ export default function TodosPage() {
                 ref={magic.innerRef}
                 {...magic.droppableProps}
               >
-                {boards.map((board, index) => (
-                  <Board
-                    index={index}
-                    board={board}
-                    key={board.title}
-                    toDos={toDos[board.title]}
-                  />
-                ))}
+                {boards.map((board, index) => {
+                  console.log("rendering board", board);
+                  return (
+                    <Board
+                      index={index}
+                      board={board}
+                      key={board.title}
+                      toDos={toDos[board.title]}
+                    />
+                  );
+                })}
                 {magic.placeholder}
               </Boards>
             )}

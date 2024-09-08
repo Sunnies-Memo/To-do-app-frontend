@@ -1,6 +1,6 @@
 import { styled } from "styled-components";
 import { cardDrop, toDoState } from "../atoms";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { constSelector, useRecoilValue, useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import DragableCard from "./DragableCard";
@@ -68,6 +68,7 @@ interface IBoardProps {
 
 function Board({ index, toDos, board }: IBoardProps) {
   console.log("in Board " + board.boardId + " toDos", toDos);
+  console.log("in board ", board);
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
   const setToDos = useSetRecoilState(toDoState);
@@ -76,11 +77,12 @@ function Board({ index, toDos, board }: IBoardProps) {
   const lastIndexRef = useRef(100);
   useEffect(() => {
     const lastIndex = toDos[toDos.length - 1]?.orderIndex;
-    lastIndexRef.current = lastIndex ? lastIndex : 100;
+    lastIndexRef.current = lastIndex ? lastIndex : 0;
   }, [toDos]);
 
   const onValid = async (todo: ITodo) => {
     const token = isLogin();
+    console.log("lastIndex", lastIndexRef.current);
     if (!token) return;
     const newToDo: ITodo = {
       text: todo.text,
@@ -88,13 +90,13 @@ function Board({ index, toDos, board }: IBoardProps) {
       board: board,
     };
     try {
-      await createToDo(newToDo, token);
+      const createdToDo = await createToDo(newToDo, token);
+      console.log("createdToDo", createdToDo);
       setToDos((prev) => {
         const newToDoObj = {
           ...prev,
-          [board.title]: [newToDo, ...prev[board.title]],
+          [board.title]: [...prev[board.title], createdToDo],
         };
-        localStorage.setItem("TODO", JSON.stringify(newToDoObj));
         return newToDoObj;
       });
       setValue("text", "");
@@ -129,14 +131,17 @@ function Board({ index, toDos, board }: IBoardProps) {
                 isDraggingOver={snapshot.isDraggingOver}
                 isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
               >
-                {toDos.map((todo, index) => (
-                  <DragableCard
-                    key={todo.todoId}
-                    index={index}
-                    toDoId={todo.todoId}
-                    toDoText={todo.text}
-                  />
-                ))}
+                {toDos.map((todo, index) => {
+                  console.log("rendering todo", todo);
+                  return (
+                    <DragableCard
+                      key={todo.todoId}
+                      index={index}
+                      toDoId={todo.todoId}
+                      toDoText={todo.text}
+                    />
+                  );
+                })}
                 {magic.placeholder}
               </Area>
             )}

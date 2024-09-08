@@ -57,7 +57,7 @@ export async function createBoard(board: IBoard, token: string) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
+    return response.json();
   } catch (error) {
     console.error("Failed to create board:", error);
     throw error;
@@ -102,7 +102,7 @@ export async function createToDo(todo: ITodo, token: string) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
+    return response.json();
   } catch (error) {
     console.error("Failed to create todo:", error);
     throw error;
@@ -132,8 +132,8 @@ export async function moveToDo(todo: ITodo, gap: number, token: string) {
   }
 }
 
-export async function deleteToDo(todoId: number | undefined, token: string) {
-  console.log("deleteToDo", JSON.stringify(todoId));
+export async function deleteToDo(todo: ITodo, token: string) {
+  console.log("deleteToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
@@ -142,13 +142,12 @@ export async function deleteToDo(todoId: number | undefined, token: string) {
       },
       //   credentials: "include",
       method: "DELETE",
-      body: JSON.stringify(todoId),
+      body: JSON.stringify(todo),
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
   } catch (error) {
     console.error("Failed to delete todo:", error);
     throw error;

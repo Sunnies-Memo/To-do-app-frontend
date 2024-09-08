@@ -107,12 +107,13 @@ function BoardForm({ refetch }: { refetch: any }) {
       memberId: userData.memberId,
     };
     try {
-      await createBoard(newBoard, token);
+      const createdBoard = await createBoard(newBoard, token);
+      console.log("createdBoard", createdBoard);
       setToDoState((prev) => {
         return { ...prev, [title]: [] };
       });
       setBoards((prev) => {
-        const newBoards: IBoardUpdate[] = [...prev, newBoard];
+        const newBoards: IBoardUpdate[] = [...prev, createdBoard];
         return newBoards;
       });
       setValue("title", "");
