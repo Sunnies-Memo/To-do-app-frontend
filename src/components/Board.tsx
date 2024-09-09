@@ -3,11 +3,11 @@ import { cardDrop, toDoState } from "../atoms";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
-import DragableCard from "./DragableCard";
 import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { useAuth } from "../util";
 import { createToDo } from "../api/todo-api";
+import DragableCard from "./DragableCard";
 
 interface IAreaProps {
   isDraggingOver: boolean;

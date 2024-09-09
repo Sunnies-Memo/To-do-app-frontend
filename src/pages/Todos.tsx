@@ -122,7 +122,7 @@ export default function TodosPage() {
         boards[destination.index - 1] == null &&
         boards[destination.index + 1] == null
       ) {
-        //아무것도 없는 board로 이동
+        //아무것도 없는 위치로 이동
         prevIndex = 0;
         nextIndex = 0;
       } else if (boards[destination.index - 1] == null) {
