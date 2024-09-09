@@ -69,7 +69,7 @@ interface IBoardProps {
 }
 
 function Board({ index, toDos, board }: IBoardProps) {
-  console.log("rendering Board : " + board.title);
+  console.log("rendering Board : " + board.title, index, toDos, board);
   const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);

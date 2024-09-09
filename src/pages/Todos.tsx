@@ -72,7 +72,7 @@ export default function TodosPage() {
           acc[cur.title] = cur.toDoList ? cur.toDoList : [];
           return acc;
         }, {});
-
+        console.log("fetched data", boardlist, obj);
         setToDos(obj);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");
