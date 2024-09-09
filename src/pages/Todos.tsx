@@ -2,7 +2,7 @@ import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
-import { Suspense, useCallback, useContext, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
@@ -52,6 +52,7 @@ export default function TodosPage() {
     queryKey: ["boards data", token],
     queryFn: async () => getBoards(token),
   });
+
   useEffect(() => {
     if (fetchedData != null) {
       try {
