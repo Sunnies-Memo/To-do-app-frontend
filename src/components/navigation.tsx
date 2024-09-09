@@ -11,6 +11,7 @@ const NavWrapper = styled.div`
   border: 1px solid black;
   /* height: 40px; */
   width: 100%;
+  z-index: 10;
 `;
 const Ul = styled.ul`
   display: flex;
