@@ -1,7 +1,7 @@
 import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
-export async function getBoards(token: string) {
+export async function getBoards(token: string | null) {
   console.log("Fetch : getBoards");
   try {
     const response = await fetch(`${BASE_URL}`, {

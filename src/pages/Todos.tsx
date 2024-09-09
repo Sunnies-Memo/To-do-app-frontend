@@ -2,7 +2,7 @@ import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useContext, useEffect, useState } from "react";
 import BoardForm from "../components/CreateBoard";
 import Board from "../components/Board";
 import TrashCan from "../components/TrashBin";
@@ -15,6 +15,7 @@ import {
   moveBoard,
   moveToDo,
 } from "../api/todo-api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Wrapper = styled.div`
   display: flex;
@@ -36,6 +37,7 @@ const Boards = styled.div`
 export default function TodosPage() {
   console.log("rendering TodosPage");
   const isLogin = useAuth();
+  const token = isLogin();
   const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
   const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
 
@@ -45,14 +47,21 @@ export default function TodosPage() {
   const [boardDrop, setBoardDrop] = useState(false);
   const [showTrashCan, setShowTrashCan] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    const token = isLogin();
-    if (token !== null) {
+  const queryClient = useQueryClient();
+  const {
+    data: fetchedData,
+    isLoading,
+    error: fetchError,
+    refetch,
+  } = useQuery<IBoard[]>({
+    queryKey: ["boards data", token],
+    queryFn: async () => getBoards(token),
+  });
+  useEffect(() => {
+    if (fetchedData != null) {
       try {
-        const toDosData: IBoard[] = await getBoards(token);
-
         let boardlist: IBoardUpdate[] = [];
-        toDosData.forEach((board) => {
+        fetchedData.forEach((board) => {
           board.boardId &&
             boardlist.push({
               title: board.title,
@@ -63,7 +72,7 @@ export default function TodosPage() {
         });
         setBoards(boardlist);
 
-        const obj = toDosData.reduce<IToDoState>((acc, cur) => {
+        const obj = fetchedData.reduce<IToDoState>((acc, cur) => {
           acc[cur.title] = cur.toDoList ? cur.toDoList : [];
           return acc;
         }, {});
@@ -73,12 +82,10 @@ export default function TodosPage() {
         alert("데이터를 가져오지 못했습니다.");
       }
     }
-  }, [isLogin]);
-  const refetch = async () => fetchData();
-  useEffect(() => {
-    fetchData();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchedData, isLogin]);
+
   useEffect(() => {
     if (boards.length > 0) {
       setLastBIndex((prev) => {
@@ -168,8 +175,7 @@ export default function TodosPage() {
       await moveBoard(thisBoard, gap, token);
       console.log("gap : ", gap);
       if (gap <= 3) {
-        console.log("refetch");
-        refetch();
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
       }
     } else if (destination.droppableId === source.droppableId) {
       //같은 board간 이동
@@ -247,7 +253,9 @@ export default function TodosPage() {
       });
 
       await moveToDo(thisTodo, gap, token);
-      if (gap <= 3) refetch();
+      if (gap <= 3) {
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+      }
     }
 
     if (destination.droppableId === "trashBin") {
@@ -370,7 +378,9 @@ export default function TodosPage() {
       });
 
       await moveToDo(thisTodo, gap, token);
-      if (gap <= 3) refetch();
+      if (gap <= 3) {
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+      }
     }
 
     setShowTrashCan(false);
