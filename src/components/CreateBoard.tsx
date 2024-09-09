@@ -1,12 +1,14 @@
 import { useForm } from "react-hook-form";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import styled from "styled-components";
-import { boardState, lastBoardIndex, toDoState, userState } from "../atoms";
+import { lastBoardIndex, userState } from "../atoms";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { IBoardForm, IBoardUpdate } from "../interface/todo-interface";
-import { useAuth } from "../util";
+import { IBoard, IBoardForm } from "../interface/todo-interface";
+
 import { createBoard } from "../api/todo-api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { v4 as uuidv4 } from "uuid";
 
 const Wrapper = styled(motion.div)`
   position: fixed;
@@ -88,38 +90,54 @@ const Title = styled.div`
   }
 `;
 
-function BoardForm({ refetch }: { refetch: any }) {
+function BoardForm({ token }: { token: string | null }) {
   console.log("rendering BoardForm");
-  const isLogin = useAuth();
+  const queryClient = useQueryClient();
   const userData = useRecoilValue(userState);
 
   const lastBIndex = useRecoilValue(lastBoardIndex);
   const [showForm, setShowForm] = useState(false);
-  const setBoards = useSetRecoilState(boardState);
-  const setToDoState = useSetRecoilState(toDoState);
   const { handleSubmit, register, setValue } = useForm<IBoardForm>();
 
+  const createBoardMutation = useMutation({
+    mutationFn: (newBoard: IBoard) => createBoard(newBoard, token),
+    onMutate: async (newBoard: IBoard) => {
+      await queryClient.cancelQueries({ queryKey: ["boards data", token] });
+      const prevData = queryClient.getQueryData<IBoard[]>([
+        "boards data",
+        token,
+      ]);
+      const tempId = uuidv4();
+      queryClient.setQueryData<IBoard[]>(["boards data", token], (prev) => {
+        if (!prev) return prevData;
+        return [
+          ...prev,
+          {
+            ...newBoard,
+            boardId: tempId,
+          },
+        ];
+      });
+
+      return { prevData };
+    },
+    onError: (_err, _newTodo, context) => {
+      queryClient.setQueryData(["boards data", token], context?.prevData);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+    },
+  });
+
   const onValid = async ({ title }: IBoardForm) => {
-    const token = isLogin();
     if (!token) return;
     const newBoard = {
       title: title,
       orderIndex: lastBIndex + 40,
       memberId: userData.memberId,
     };
-    try {
-      const createdBoard = await createBoard(newBoard, token);
-      setToDoState((prev) => {
-        return { ...prev, [title]: [] };
-      });
-      setBoards((prev) => {
-        const newBoards: IBoardUpdate[] = [...prev, createdBoard];
-        return newBoards;
-      });
-      setValue("title", "");
-    } catch {
-      return;
-    }
+    createBoardMutation.mutate(newBoard);
+    setValue("title", "");
   };
 
   return (

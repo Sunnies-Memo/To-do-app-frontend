@@ -42,7 +42,7 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
   }
 }
 
-export async function createBoard(board: IBoard, token: string) {
+export async function createBoard(board: IBoard, token: string | null) {
   console.log("Fetch : createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
@@ -87,7 +87,7 @@ export async function deleteBoard(board: IBoardUpdate, token: string) {
   }
 }
 
-export async function createToDo(todo: ITodo, token: string) {
+export async function createToDo(todo: ITodo, token: string | null) {
   console.log("Fetch : createToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {

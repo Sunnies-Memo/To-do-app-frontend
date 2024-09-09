@@ -48,12 +48,7 @@ export default function TodosPage() {
   const [showTrashCan, setShowTrashCan] = useState(false);
 
   const queryClient = useQueryClient();
-  const {
-    data: fetchedData,
-    isLoading,
-    error: fetchError,
-    refetch,
-  } = useQuery<IBoard[]>({
+  const { data: fetchedData } = useQuery<IBoard[]>({
     queryKey: ["boards data", token],
     queryFn: async () => getBoards(token),
   });
@@ -391,7 +386,7 @@ export default function TodosPage() {
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Wrapper className="wrapper">
           <Suspense fallback={<div>Loading...</div>}>
-            <BoardForm refetch={refetch} />
+            <BoardForm token={token} />
           </Suspense>
           <StrictModeDroppable
             droppableId="boards"
