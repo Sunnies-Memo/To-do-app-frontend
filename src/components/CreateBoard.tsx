@@ -1,9 +1,12 @@
 import { useForm } from "react-hook-form";
-import { useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { boardState, toDoState } from "../atoms";
+import { boardState, lastBoardIndex, toDoState, userState } from "../atoms";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { IBoardForm, IBoardUpdate } from "../interface/todo-interface";
+import { useAuth } from "../util";
+import { createBoard } from "../api/todo-api";
 
 const Wrapper = styled(motion.div)`
   position: fixed;
@@ -84,24 +87,39 @@ const Title = styled.div`
     font-weight: bold;
   }
 `;
-interface IBoardForm {
-  boardName: string;
-}
-function BoardForm() {
+
+function BoardForm({ refetch }: { refetch: any }) {
+  console.log("rendering BoardForm");
+  const isLogin = useAuth();
+  const userData = useRecoilValue(userState);
+
+  const lastBIndex = useRecoilValue(lastBoardIndex);
   const [showForm, setShowForm] = useState(false);
-  const setToDoState = useSetRecoilState(toDoState);
   const setBoards = useSetRecoilState(boardState);
+  const setToDoState = useSetRecoilState(toDoState);
   const { handleSubmit, register, setValue } = useForm<IBoardForm>();
-  const onValid = ({ boardName }: IBoardForm) => {
-    setToDoState((prev) => {
-      return { ...prev, [boardName]: [] };
-    });
-    setBoards((prev) => {
-      const newBoards = [...prev, boardName];
-      localStorage.setItem("BOARDS", JSON.stringify(newBoards));
-      return newBoards;
-    });
-    setValue("boardName", "");
+
+  const onValid = async ({ title }: IBoardForm) => {
+    const token = isLogin();
+    if (!token) return;
+    const newBoard = {
+      title: title,
+      orderIndex: lastBIndex + 40,
+      memberId: userData.memberId,
+    };
+    try {
+      const createdBoard = await createBoard(newBoard, token);
+      setToDoState((prev) => {
+        return { ...prev, [title]: [] };
+      });
+      setBoards((prev) => {
+        const newBoards: IBoardUpdate[] = [...prev, createdBoard];
+        return newBoards;
+      });
+      setValue("title", "");
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -128,7 +146,7 @@ function BoardForm() {
             <div>
               <input
                 type="text"
-                {...register("boardName", { required: true })}
+                {...register("title", { required: true })}
                 placeholder="Board Name..."
               />
               <button>Create</button>

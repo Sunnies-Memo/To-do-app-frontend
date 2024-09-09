@@ -1,8 +1,8 @@
-import { IBoard, ITodo } from "../interface/todo-interface";
-
+import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
 export async function getBoards(token: string) {
+  console.log("Fetch : getBoards");
   try {
     const response = await fetch(`${BASE_URL}`, {
       //   headers: { Authorization: `Bearer ${token}` },
@@ -19,7 +19,31 @@ export async function getBoards(token: string) {
   }
 }
 
+export async function moveBoard(board: IBoard, gap: number, token: string) {
+  console.log("Fetch : moveBoard : " + board.title);
+  try {
+    const response = await fetch(`${BASE_URL}`, {
+      headers: {
+        // Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+      },
+      //   credentials: "include",
+      method: "PUT",
+      body: JSON.stringify({ board: board, gap: gap }),
+    });
+    if (!response.ok) {
+      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to move board:", error);
+    throw error;
+  }
+}
+
 export async function createBoard(board: IBoard, token: string) {
+  console.log("Fetch : createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -34,14 +58,15 @@ export async function createBoard(board: IBoard, token: string) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
+    return response.json();
   } catch (error) {
     console.error("Failed to create board:", error);
     throw error;
   }
 }
 
-export async function deleteBoard(boardId: number, token: string) {
+export async function deleteBoard(board: IBoardUpdate, token: string) {
+  console.log("Fetch : deleteBoard");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -50,13 +75,12 @@ export async function deleteBoard(boardId: number, token: string) {
       },
       //   credentials: "include",
       method: "DELETE",
-      body: JSON.stringify({ boardId: boardId }),
+      body: JSON.stringify(board),
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
   } catch (error) {
     console.error("Failed to delete board:", error);
     throw error;
@@ -64,8 +88,9 @@ export async function deleteBoard(boardId: number, token: string) {
 }
 
 export async function createToDo(todo: ITodo, token: string) {
+  console.log("Fetch : createToDo", JSON.stringify(todo));
   try {
-    const response = await fetch(`${BASE_URL}`, {
+    const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
         // Authorization: `Bearer ${token}`
         "Content-Type": "application/json",
@@ -78,20 +103,24 @@ export async function createToDo(todo: ITodo, token: string) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
+    return response.json();
   } catch (error) {
     console.error("Failed to create todo:", error);
     throw error;
   }
 }
 
-export async function moveToDo(todo: ITodo, token: string) {
+export async function moveToDo(todo: ITodo, gap: number, token: string) {
+  console.log("Fetch : moveToDo", JSON.stringify({ todo: todo, gap: gap }));
   try {
-    const response = await fetch(`${BASE_URL}`, {
-      //   headers: { Authorization: `Bearer ${token}` },
+    const response = await fetch(`${BASE_URL}/todo`, {
+      headers: {
+        // Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+      },
       //   credentials: "include",
       method: "PUT",
-      body: "",
+      body: JSON.stringify({ todo: todo, gap: gap }),
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
@@ -105,8 +134,9 @@ export async function moveToDo(todo: ITodo, token: string) {
 }
 
 export async function deleteToDo(todo: ITodo, token: string) {
+  console.log("Fetch : deleteToDo", JSON.stringify(todo));
   try {
-    const response = await fetch(`${BASE_URL}`, {
+    const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
         // Authorization: `Bearer ${token}`
         "Content-Type": "application/json",
@@ -119,7 +149,6 @@ export async function deleteToDo(todo: ITodo, token: string) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
   } catch (error) {
     console.error("Failed to delete todo:", error);
     throw error;

@@ -3,9 +3,11 @@ import { cardDrop, toDoState } from "../atoms";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
+import React, { useEffect, useRef } from "react";
+import { IBoard, ITodo } from "../interface/todo-interface";
+import { useAuth } from "../util";
+import { createToDo } from "../api/todo-api";
 import DragableCard from "./DragableCard";
-import React from "react";
-import { ITodo } from "../interface/todo-interface";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -61,48 +63,64 @@ const Form = styled.form`
 interface IBoardProps {
   index: number;
   toDos: ITodo[];
-  boardId: string;
+  board: IBoard;
 }
-interface IForm {
-  toDo: string;
-}
-function Board({ index, toDos, boardId }: IBoardProps) {
-  console.log("board", boardId);
-  console.log("todos", toDos);
-  const { register, handleSubmit, setValue } = useForm<IForm>();
+
+function Board({ index, toDos, board }: IBoardProps) {
+  console.log("rendering Board : " + board.title);
+  const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
   const setToDos = useSetRecoilState(toDoState);
-  const onValid = ({ toDo }: IForm) => {
+  const isLogin = useAuth();
+
+  const lastIndexRef = useRef(100);
+  useEffect(() => {
+    const lastIndex = toDos[toDos.length - 1]?.orderIndex;
+    lastIndexRef.current = lastIndex ? lastIndex : 0;
+  }, [toDos]);
+
+  const onValid = async (todo: ITodo) => {
+    const token = isLogin();
+    if (!token) return;
     const newToDo: ITodo = {
-      id: Date.now(),
-      text: toDo,
+      text: todo.text,
+      orderIndex: lastIndexRef.current + 40,
+      board: board,
     };
-    setToDos((prev) => {
-      const newToDoObj = {
-        ...prev,
-        [boardId]: [newToDo, ...prev[boardId]],
-      };
-      localStorage.setItem("TODO", JSON.stringify(newToDoObj));
-      return newToDoObj;
-    });
-    setValue("toDo", "");
+    try {
+      const createdToDo = await createToDo(newToDo, token);
+      setToDos((prev) => {
+        const newToDoObj = {
+          ...prev,
+          [board.title]: [...prev[board.title], createdToDo],
+        };
+        return newToDoObj;
+      });
+      setValue("text", "");
+    } catch {
+      return;
+    }
   };
-  console.log("draggableId", boardId);
+
   return (
-    <Draggable key={boardId} draggableId={boardId} index={index}>
+    <Draggable key={board.boardId} draggableId={board.title} index={index}>
       {(magic) => (
         <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
           <Title {...magic.dragHandleProps}>
-            <span>{boardId}</span>
+            <span>{board.title}</span>
           </Title>
           <Form onSubmit={handleSubmit(onValid)}>
             <input
-              {...register("toDo", { required: true })}
+              {...register("text", { required: true })}
               type="text"
-              placeholder={`Add task on ${boardId}`}
+              placeholder={`Add task on ${board.title}`}
             />
           </Form>
-          <Droppable droppableId={boardId} isDropDisabled={isCardDrop}>
+          <Droppable
+            droppableId={index + ""}
+            isDropDisabled={isCardDrop}
+            key={board.boardId}
+          >
             {(magic, snapshot) => (
               <Area
                 ref={magic.innerRef}
@@ -110,14 +128,16 @@ function Board({ index, toDos, boardId }: IBoardProps) {
                 isDraggingOver={snapshot.isDraggingOver}
                 isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
               >
-                {toDos.map((todo, index) => (
-                  <DragableCard
-                    key={todo.id}
-                    index={index}
-                    toDoId={todo.id}
-                    toDoText={todo.text}
-                  />
-                ))}
+                {toDos.map((todo, index) => {
+                  return (
+                    <DragableCard
+                      key={todo.todoId}
+                      index={index}
+                      toDoId={todo.todoId}
+                      toDoText={todo.text}
+                    />
+                  );
+                })}
                 {magic.placeholder}
               </Area>
             )}
