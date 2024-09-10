@@ -4,7 +4,13 @@ export interface IBoard extends IBoardUpdate {
 
 export interface IBoardUpdate {
   title: string;
-  boardId?: string;
+  boardId: string;
+  orderIndex: number;
+  memberId: number;
+}
+
+export interface IBoardCreate {
+  title: string;
   orderIndex: number;
   memberId: number;
 }

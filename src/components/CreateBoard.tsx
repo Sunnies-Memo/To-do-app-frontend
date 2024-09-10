@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { lastBoardIndex, userState } from "../atoms";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { IBoard, IBoardForm } from "../interface/todo-interface";
+import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
 
 import { createBoard } from "../api/todo-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -100,23 +100,20 @@ function BoardForm({ token }: { token: string | null }) {
   const { handleSubmit, register, setValue } = useForm<IBoardForm>();
 
   const createBoardMutation = useMutation({
-    mutationFn: (newBoard: IBoard) => createBoard(newBoard, token),
-    onMutate: async (newBoard: IBoard) => {
+    mutationFn: (newBoard: IBoardCreate) => createBoard(newBoard, token),
+    onMutate: async (newBoard: IBoardCreate) => {
+      console.log("======newBoard", newBoard);
       await queryClient.cancelQueries({ queryKey: ["boards data", token] });
       const prevData = queryClient.getQueryData<IBoard[]>([
         "boards data",
         token,
       ]);
-      const tempId = uuidv4();
+      const tempId = "temporaryIdForBoard";
       queryClient.setQueryData<IBoard[]>(["boards data", token], (prev) => {
         if (!prev) return prevData;
-        return [
-          ...prev,
-          {
-            ...newBoard,
-            boardId: tempId,
-          },
-        ];
+        const newData = [...prev, { ...newBoard, boardId: tempId }];
+        console.log("=====new data", newData);
+        return newData;
       });
 
       return { prevData };
@@ -125,6 +122,7 @@ function BoardForm({ token }: { token: string | null }) {
       queryClient.setQueryData(["boards data", token], context?.prevData);
     },
     onSettled: () => {
+      console.log("---------------------------------settled");
       queryClient.invalidateQueries({ queryKey: ["boards data", token] });
     },
   });

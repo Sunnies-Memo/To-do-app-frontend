@@ -135,7 +135,11 @@ function Board({ index, toDos, board }: IBoardProps) {
   };
 
   return (
-    <Draggable key={board.boardId} draggableId={board.title} index={index}>
+    <Draggable
+      key={board.boardId}
+      draggableId={board.boardId + ""}
+      index={index}
+    >
       {(magic) => (
         <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
           <Title {...magic.dragHandleProps}>

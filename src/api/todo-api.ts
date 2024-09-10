@@ -1,4 +1,9 @@
-import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
+import {
+  IBoard,
+  IBoardCreate,
+  IBoardUpdate,
+  ITodo,
+} from "../interface/todo-interface";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
 export async function getBoards(token: string | null) {
@@ -42,7 +47,7 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
   }
 }
 
-export async function createBoard(board: IBoard, token: string | null) {
+export async function createBoard(board: IBoardCreate, token: string | null) {
   console.log("Fetch : createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
