@@ -1,10 +1,3 @@
-export interface ITodo {
-  todoId?: string;
-  text: string;
-  orderIndex?: number;
-  board?: IBoard;
-}
-
 export interface IBoard extends IBoardUpdate {
   toDoList?: ITodo[];
 }
@@ -16,10 +9,16 @@ export interface IBoardUpdate {
   memberId: number;
 }
 
-export interface IBoardForm {
-  title: string;
-}
-
 export interface IToDoState {
   [key: string]: ITodo[];
+}
+export interface ITodo {
+  todoId?: string;
+  text: string;
+  orderIndex?: number;
+  board?: IBoard;
+}
+
+export interface IBoardForm {
+  title: string;
 }

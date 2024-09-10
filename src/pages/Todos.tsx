@@ -68,12 +68,12 @@ export default function TodosPage() {
         });
         setBoards(boardlist);
 
-        const obj = fetchedData.reduce<IToDoState>((acc, cur) => {
+        const todosList = fetchedData.reduce<IToDoState>((acc, cur) => {
           acc[cur.title] = cur.toDoList ? cur.toDoList : [];
           return acc;
         }, {});
-        console.log("fetched data", boardlist, obj);
-        setToDos(obj);
+        console.log("fetched data", boardlist, todosList);
+        setToDos(todosList);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");
       }
