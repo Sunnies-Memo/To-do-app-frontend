@@ -282,6 +282,7 @@ export default function TodosPage() {
           return newObj;
         });
         await deleteBoard(boards[source.index], token);
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
       } else {
         //todo card 삭제
         setToDos((prev) => {

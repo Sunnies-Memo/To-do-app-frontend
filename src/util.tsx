@@ -59,15 +59,9 @@ export const useUpdateToDos = () => {
       ...(await snapshot.getPromise(toDoState)),
     };
 
-    console.log(
-      "fetching======================================================"
-    );
-    console.log("newData", newData);
-    console.log("before filter", prevBoards);
     prevBoards = prevBoards.filter(
       (item) => item.boardId !== "temporaryIdForBoard"
     );
-    console.log("prevBoard", prevBoards);
 
     const newBoards: IBoardUpdate[] = newData;
     const newToDoStates: IToDoState = newData.reduce<IToDoState>((acc, cur) => {
@@ -99,6 +93,7 @@ export const useUpdateToDos = () => {
         }
       }
     });
+    console.log("prevBoard", prevBoards);
     set(boardState, prevBoards);
     set(toDoState, prevTodoStates);
   });
