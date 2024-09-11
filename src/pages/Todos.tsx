@@ -64,37 +64,6 @@ export default function TodosPage() {
     }
   }, [fetchedData, isLogin]);
 
-  /*
-  useEffect(() => {
-    if (fetchedData != null) {
-      try {
-        let boardlist: IBoardUpdate[] = [];
-        fetchedData.forEach((board) => {
-          board.boardId &&
-            boardlist.push({
-              title: board.title,
-              boardId: board.boardId,
-              orderIndex: board.orderIndex,
-              memberId: board.memberId,
-            });
-        });
-        setBoards(boardlist);
-
-        const todosList = fetchedData.reduce<IToDoState>((acc, cur) => {
-          acc[cur.title] = cur.toDoList ? cur.toDoList : [];
-          return acc;
-        }, {});
-        console.log("fetched data", boardlist, todosList);
-        setToDos(todosList);
-      } catch (error) {
-        alert("데이터를 가져오지 못했습니다.");
-      }
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchedData, isLogin]);
-*/
-
   useEffect(() => {
     if (boards.length > 0) {
       setLastBIndex((prev) => {
@@ -134,6 +103,10 @@ export default function TodosPage() {
       //db의 board orderIndex 수정
       let prevIndex: number | null;
       let nextIndex: number | null;
+      console.log("source index", source.index);
+      console.log("source board", boards[source.index]);
+      console.log("destination index", destination.index);
+      console.log("destination board", boards[destination.index]);
       if (
         boards[destination.index - 1] == null &&
         boards[destination.index + 1] == null
@@ -149,6 +122,10 @@ export default function TodosPage() {
         //맨 뒤로 이동
         prevIndex = boards[destination.index].orderIndex;
         nextIndex = null;
+      } else if (boards[source.index - 1] == null) {
+        //맨 앞에서 뒤로 이동
+        prevIndex = boards[destination.index].orderIndex;
+        nextIndex = boards[destination.index + 1].orderIndex;
       } else {
         prevIndex = boards[destination.index - 1].orderIndex;
         nextIndex = boards[destination.index].orderIndex;
@@ -191,6 +168,10 @@ export default function TodosPage() {
       //db의 todo card orderIndex 수정
       let prevIndex: number | undefined;
       let nextIndex: number | undefined;
+      console.log(
+        "destionation index",
+        toDos[boards[Number(source.droppableId)].boardId][destination.index]
+      );
       if (
         toDos[boards[Number(source.droppableId)].boardId][
           destination.index - 1
@@ -222,6 +203,17 @@ export default function TodosPage() {
           toDos[boards[Number(source.droppableId)].boardId][destination.index]
             .orderIndex;
         nextIndex = undefined;
+      } else if (
+        toDos[boards[Number(source.droppableId)].boardId][source.index - 1] ===
+        undefined
+      ) {
+        prevIndex =
+          toDos[boards[Number(source.droppableId)].boardId][destination.index]
+            .orderIndex;
+        nextIndex =
+          toDos[boards[Number(source.droppableId)].boardId][
+            destination.index + 1
+          ].orderIndex;
       } else {
         prevIndex =
           toDos[boards[Number(source.droppableId)].boardId][
