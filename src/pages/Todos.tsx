@@ -103,10 +103,6 @@ export default function TodosPage() {
       //db의 board orderIndex 수정
       let prevIndex: number | null;
       let nextIndex: number | null;
-      console.log("source index", source.index);
-      console.log("source board", boards[source.index]);
-      console.log("destination index", destination.index);
-      console.log("destination board", boards[destination.index]);
       if (
         boards[destination.index - 1] == null &&
         boards[destination.index + 1] == null
@@ -159,7 +155,6 @@ export default function TodosPage() {
       });
 
       await moveBoard(thisBoard, gap, token);
-      console.log("gap : ", gap);
       if (gap <= 3) {
         queryClient.invalidateQueries({ queryKey: ["boards data", token] });
       }
@@ -168,10 +163,7 @@ export default function TodosPage() {
       //db의 todo card orderIndex 수정
       let prevIndex: number | undefined;
       let nextIndex: number | undefined;
-      console.log(
-        "destionation index",
-        toDos[boards[Number(source.droppableId)].boardId][destination.index]
-      );
+
       if (
         toDos[boards[Number(source.droppableId)].boardId][
           destination.index - 1
@@ -393,8 +385,6 @@ export default function TodosPage() {
     setShowTrashCan(false);
   };
 
-  console.log("data", boards, toDos);
-
   return (
     <>
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
@@ -414,7 +404,6 @@ export default function TodosPage() {
                 {...magic.droppableProps}
               >
                 {boards.map((board, index) => {
-                  console.log("rendering board", board);
                   return (
                     <Board
                       index={index}

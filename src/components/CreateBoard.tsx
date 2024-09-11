@@ -102,7 +102,6 @@ function BoardForm({ token }: { token: string | null }) {
   const createBoardMutation = useMutation({
     mutationFn: (newBoard: IBoardCreate) => createBoard(newBoard, token),
     onMutate: async (newBoard: IBoardCreate) => {
-      console.log("======newBoard", newBoard);
       await queryClient.cancelQueries({ queryKey: ["boards data", token] });
       const prevData = queryClient.getQueryData<IBoard[]>([
         "boards data",
@@ -112,7 +111,6 @@ function BoardForm({ token }: { token: string | null }) {
       queryClient.setQueryData<IBoard[]>(["boards data", token], (prev) => {
         if (!prev) return prevData;
         const newData = [...prev, { ...newBoard, boardId: tempId }];
-        console.log("=====new data", newData);
         return newData;
       });
 
@@ -122,7 +120,6 @@ function BoardForm({ token }: { token: string | null }) {
       queryClient.setQueryData(["boards data", token], context?.prevData);
     },
     onSettled: () => {
-      console.log("---------------------------------settled");
       queryClient.invalidateQueries({ queryKey: ["boards data", token] });
     },
   });
