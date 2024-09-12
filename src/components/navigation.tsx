@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useResetRecoilState } from "recoil";
 import { userState } from "../atoms";
 import styled from "styled-components";
@@ -20,19 +20,27 @@ const Ul = styled.ul`
   }
 `;
 
+export interface ILocation {}
 export default function NavigationBar() {
+  const location = useLocation();
+
   const logout = useResetRecoilState(userState);
   return (
-    <NavWrapper>
-      <Ul>
-        <Link to="/todos">
-          <li>To Dos</li>
-        </Link>
-        <Link to="/mypage">
-          <li>My Page</li>
-        </Link>
-      </Ul>
-      <button onClick={() => logout()}>Log Out</button>
-    </NavWrapper>
+    <>
+      {location.pathname === "/login" ||
+      location.pathname === "/join" ? null : (
+        <NavWrapper>
+          <Ul>
+            <Link to="/todos">
+              <li>To Dos</li>
+            </Link>
+            <Link to="/mypage">
+              <li>My Page</li>
+            </Link>
+          </Ul>
+          <button onClick={() => logout()}>Log Out</button>
+        </NavWrapper>
+      )}
+    </>
   );
 }
