@@ -11,55 +11,29 @@ export async function doLogin(loginForm: ILoginForm) {
       },
       credentials: "include",
       method: "POST",
+      body: JSON.stringify(loginForm),
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    //받은 토큰을 저장하는 로직
 
     return await response.json();
   } catch (error) {
     console.error("Failed to login:", error);
-    throw error;
+    return null;
   }
 }
 
 export async function doLogout() {
-  //   try {
-  // const response = await fetch(`${BASE_URL}`, {
-  //   headers: { Authorization: `Bearer ${token}` },
-  //   credentials: "include",
-  //     });
-  //     if (!response.ok) {
-  //       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
-  //       throw new Error(errorMessage);
-  //     }
-  //     return await response.json();
-  //   } catch (error) {
-  //     console.error("Failed to login:", error);
-  //     throw error;
-  //   }
+  const response = await fetch(`${BASE_URL}`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return response;
 }
 
-export async function getUserInfo() {
-  //   try {
-  // const response = await fetch(`${BASE_URL}`, {
-  //   headers: { Authorization: `Bearer ${token}` },
-  //   credentials: "include",
-  //     });
-  //     if (!response.ok) {
-  //       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
-  //       throw new Error(errorMessage);
-  //     }
-  //     return await response.json();
-  //   } catch (error) {
-  //     console.error("Failed to login:", error);
-  //     throw error;
-  //   }
-}
-
-export async function register(registerForm: IRegisterForm) {
+export async function doRegister(registerForm: IRegisterForm) {
   try {
     const response = await fetch(`${BASE_URL}/register`, {
       headers: {
@@ -80,23 +54,20 @@ export async function register(registerForm: IRegisterForm) {
   }
 }
 
-export async function refresh(refreshToken: string) {
+export async function doRefresh() {
   try {
     const response = await fetch(`${BASE_URL}/refresh`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
       credentials: "include",
       method: "POST",
-      body: JSON.stringify(refreshToken),
     });
-    if (!response.ok) {
-      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
-      throw new Error(errorMessage);
+
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error("Failed to refresh token");
     }
-    return await response.json();
   } catch (error) {
-    console.error("Failed to login:", error);
-    throw error;
+    console.error("Failed to Refresh:", error);
+    return null;
   }
 }

@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { DroppableProps, Droppable } from "react-beautiful-dnd";
-import { useRecoilCallback, useRecoilValue, useResetRecoilState } from "recoil";
+import {
+  useRecoilCallback,
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+} from "recoil";
 import {
   boardState,
   isAuthenticated,
@@ -11,6 +16,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { IBoard, IBoardUpdate, IToDoState } from "./interface/todo-interface";
 import _ from "lodash";
+import { ILoginForm } from "./pages/Login";
+import { doLogin, doLogout, doRefresh } from "./api/auth-api";
+import { error } from "console";
 
 export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   const [enabled, setEnabled] = useState(false);
@@ -31,23 +39,52 @@ export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   return <Droppable {...props}>{children}</Droppable>;
 };
 
-//로그인이 안되어있는 경우 로그인페이지로 이동
 export const useAuth = () => {
   const isAuthed = useRecoilValue(isAuthenticated);
-  const token = useRecoilValue(userToken);
-  const logout = useResetRecoilState(userState);
+  const [token, setToken] = useRecoilState(userToken);
+  const resetUserState = useResetRecoilState(userState);
   const navigate = useNavigate();
 
-  const isLogin = useCallback(() => {
-    if (isAuthed) {
-      return token;
-    } else {
-      // logout();
-      // navigate("/login");
-      return null;
+  const logout = useCallback(async () => {
+    const response = await doLogout();
+    if (response.ok) {
+      resetUserState();
+      setToken("");
+      navigate("/login");
     }
-  }, [isAuthed, navigate]);
-  return isLogin;
+  }, [navigate, resetUserState, setToken]);
+
+  const isLogin = useCallback(() => {
+    return isAuthed ? token : null;
+  }, [isAuthed, token]);
+
+  const login = async (loginForm: ILoginForm) => {
+    const accessToken: string = await doLogin(loginForm);
+    if (accessToken !== null) {
+      setToken((prev) => (prev === accessToken ? prev : accessToken));
+    } else {
+      throw new Error("Fail to Login");
+    }
+  };
+
+  const refresh = async () => {
+    try {
+      const newAccessToken: string | null = await doRefresh();
+      if (newAccessToken) {
+        setToken((prevToken) =>
+          prevToken === newAccessToken ? prevToken : newAccessToken
+        ); // 조건부 업데이트
+        return true;
+      }
+      logout(); // 실패 시 로그아웃
+      return false;
+    } catch (error) {
+      logout(); // 실패 시 로그아웃
+      return false;
+    }
+  };
+
+  return { isLogin, login, logout, refresh };
 };
 
 export const useUpdateToDos = () => {

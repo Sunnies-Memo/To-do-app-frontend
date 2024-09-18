@@ -26,18 +26,18 @@ export const lastBoardIndex = atom<number>({
   default: 100,
 });
 
-//유저 관련s
+//유저 관련
 export const userState = atom({
   key: "userState",
   default: {
-    memberId: 1, //null로 바꿔놔야
+    memberId: null, //null로 바꿔놔야
     username: "",
   },
 });
 
 export const userToken = atom({
-  key: "token",
-  default: "token",
+  key: "accessToken",
+  default: "",
 });
 
 export const isAuthenticated = selector({
