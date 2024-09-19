@@ -18,7 +18,6 @@ import { IBoard, IBoardUpdate, IToDoState } from "./interface/todo-interface";
 import _ from "lodash";
 import { ILoginForm } from "./pages/Login";
 import { doLogin, doLogout, doRefresh } from "./api/auth-api";
-import { error } from "console";
 
 export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   const [enabled, setEnabled] = useState(false);

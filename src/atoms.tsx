@@ -30,7 +30,7 @@ export const lastBoardIndex = atom<number>({
 export const userState = atom({
   key: "userState",
   default: {
-    memberId: null, //null로 바꿔놔야
+    memberId: 0, //null로 바꿔놔야
     username: "",
   },
 });

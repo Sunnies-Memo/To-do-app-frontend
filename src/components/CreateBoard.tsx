@@ -8,7 +8,6 @@ import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
 
 import { createBoard } from "../api/todo-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { v4 as uuidv4 } from "uuid";
 
 const Wrapper = styled(motion.div)`
   position: fixed;
