@@ -44,7 +44,7 @@ export const isAuthenticated = selector({
   key: "isAuthenticated",
   get: ({ get }) => {
     const data = get(userState);
-    if (data.memberId !== null) return true;
+    if (data.memberId !== null && data.memberId !== 0) return true;
     else return false;
   },
 });

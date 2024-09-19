@@ -70,7 +70,7 @@ function Board({ index, toDos, board }: IBoardProps) {
   console.log("rendering Board : " + board.title, index, toDos, board);
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
-  const isLogin = useAuth();
+  const { isLogin } = useAuth();
   const setToDos = useSetRecoilState(toDoState);
 
   const lastIndexRef = useRef(100);

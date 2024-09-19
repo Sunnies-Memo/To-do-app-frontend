@@ -36,7 +36,7 @@ const Boards = styled.div`
 
 export default function TodosPage() {
   console.log("rendering TodosPage");
-  const isLogin = useAuth();
+  const { isLogin } = useAuth();
   const token = isLogin();
   const updateData = useUpdateToDos();
   const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);

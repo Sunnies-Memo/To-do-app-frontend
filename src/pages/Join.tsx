@@ -1,19 +1,16 @@
 import styled from "styled-components";
-import { AuthWrapper, ILoginForm } from "./Login";
+import { AuthWrapper } from "./Login";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
 import { doRegister } from "../api/auth-api";
+import { IRegisterForm } from "../interface/auth-interface";
 
 const JoinForm = styled.form`
   display: flex;
   width: 100%;
+  flex-direction: column;
 `;
 const JoinSubmitBtn = styled.button``;
-
-export interface IJoinForm extends ILoginForm {
-  profileImg?: string;
-}
 
 export default function JoinPage() {
   const navigate = useNavigate();
@@ -23,8 +20,8 @@ export default function JoinPage() {
     formState: { errors },
     setValue,
     setError,
-  } = useForm<IJoinForm>();
-  const onValid = async (data: IJoinForm) => {
+  } = useForm<IRegisterForm>();
+  const onValid = async (data: IRegisterForm) => {
     try {
       await doRegister(data);
       navigate("/login");
@@ -57,7 +54,7 @@ export default function JoinPage() {
         {errors.username && <p>{errors.username.message}</p>}
         <input
           type="passowrd"
-          {...register("username", {
+          {...register("password", {
             required: "Password is required",
             minLength: {
               value: 7,
@@ -76,7 +73,16 @@ export default function JoinPage() {
           })}
         />
         {errors.password && <p>{errors.password.message}</p>}
-        <input type="hidden" {...register("profileImg", { required: false })} />
+        <input
+          type="hidden"
+          {...register("profileImg", {
+            required: false,
+            pattern: {
+              value: /^(https?:\/\/.*\.(?:png|jpg|jpeg))$/i,
+              message: "Please enter a valid image URL (jpg, jpeg, png)",
+            },
+          })}
+        />
         <JoinSubmitBtn>Join</JoinSubmitBtn>
       </JoinForm>
     </AuthWrapper>

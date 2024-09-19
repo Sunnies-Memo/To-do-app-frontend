@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../util";
 import { useState } from "react";
+import { ILoginForm } from "../interface/auth-interface";
 
 export const AuthWrapper = styled.div`
   display: flex;
@@ -15,6 +16,7 @@ export const AuthWrapper = styled.div`
 `;
 const LoginForm = styled.form`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -22,11 +24,6 @@ const LoginForm = styled.form`
 `;
 
 const LoginSumbitBtn = styled.button``;
-
-export interface ILoginForm {
-  username: string;
-  password: string;
-}
 
 export default function LoginPage() {
   const navigate = useNavigate();

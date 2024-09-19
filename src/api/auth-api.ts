@@ -1,9 +1,9 @@
-import { IRegisterForm } from "../interface/usert-interface";
-import { ILoginForm } from "../pages/Login";
+import { ILoginForm, IRegisterForm } from "../interface/auth-interface";
 
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/auth`;
 
 export async function doLogin(loginForm: ILoginForm) {
+  console.log("in api", JSON.stringify(loginForm));
   try {
     const response = await fetch(`${BASE_URL}/login`, {
       headers: {
@@ -34,6 +34,7 @@ export async function doLogout() {
 }
 
 export async function doRegister(registerForm: IRegisterForm) {
+  console.log("in api", JSON.stringify(registerForm));
   try {
     const response = await fetch(`${BASE_URL}/register`, {
       headers: {
@@ -47,9 +48,9 @@ export async function doRegister(registerForm: IRegisterForm) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
+    return response;
   } catch (error) {
-    console.error("Failed to login:", error);
+    console.error("Failed to register:", error);
     throw error;
   }
 }
