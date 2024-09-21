@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useResetRecoilState } from "recoil";
 import { userState } from "../atoms";
 import styled from "styled-components";
+import { useAuth } from "../util";
 
 const NavWrapper = styled.div`
   position: fixed;
@@ -23,8 +24,7 @@ const Ul = styled.ul`
 export interface ILocation {}
 export default function NavigationBar() {
   const location = useLocation();
-
-  const logout = useResetRecoilState(userState);
+  const { logout } = useAuth();
   return (
     <>
       {location.pathname === "/login" ||

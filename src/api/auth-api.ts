@@ -25,12 +25,25 @@ export async function doLogin(loginForm: ILoginForm) {
   }
 }
 
-export async function doLogout() {
-  const response = await fetch(`${BASE_URL}`, {
-    method: "POST",
-    credentials: "include",
-  });
-  return response;
+export async function doLogout(token: string) {
+  console.log("doLogout");
+  try {
+    const response = await fetch(`${BASE_URL}/logout`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+    return true;
+  } catch (error) {
+    console.error("Fail to logout", error);
+    throw error;
+  }
 }
 
 export async function doRegister(registerForm: IRegisterForm) {

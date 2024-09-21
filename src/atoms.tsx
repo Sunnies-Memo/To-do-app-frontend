@@ -1,5 +1,6 @@
 import { atom, atomFamily, selector } from "recoil";
 import { IBoardUpdate, ITodo, IToDoState } from "./interface/todo-interface";
+import { IUserState } from "./interface/auth-interface";
 
 export const toDoState = atom<IToDoState>({
   key: "toDo",
@@ -27,11 +28,12 @@ export const lastBoardIndex = atom<number>({
 });
 
 //유저 관련
-export const userState = atom({
+export const userState = atom<IUserState>({
   key: "userState",
   default: {
-    memberId: 0, //null로 바꿔놔야
     username: "",
+    profileImg: undefined,
+    bgImg: undefined,
   },
 });
 
@@ -44,7 +46,7 @@ export const isAuthenticated = selector({
   key: "isAuthenticated",
   get: ({ get }) => {
     const data = get(userState);
-    if (data.memberId !== null && data.memberId !== 0) return true;
+    if (data.username !== null && data.username.length > 0) return true;
     else return false;
   },
 });

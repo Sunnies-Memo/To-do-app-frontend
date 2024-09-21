@@ -16,6 +16,7 @@ import {
   moveToDo,
 } from "../api/todo-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
@@ -36,6 +37,7 @@ const Boards = styled.div`
 
 export default function TodosPage() {
   console.log("rendering TodosPage");
+  const navigate = useNavigate();
   const { isLogin } = useAuth();
   const token = isLogin();
   const updateData = useUpdateToDos();
@@ -55,6 +57,10 @@ export default function TodosPage() {
   });
 
   useEffect(() => {
+    if (!isLogin()) {
+      console.log("로그인 안돼있음");
+      navigate("/login");
+    }
     if (fetchedData != null) {
       try {
         updateData(fetchedData);

@@ -10,8 +10,8 @@ export async function getBoards(token: string | null) {
   console.log("Fetch : getBoards");
   try {
     const response = await fetch(`${BASE_URL}`, {
-      //   headers: { Authorization: `Bearer ${token}` },
-      //   credentials: "include",
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
@@ -29,10 +29,10 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "PUT",
       body: JSON.stringify({ board: board, gap: gap }),
     });
@@ -52,10 +52,10 @@ export async function createBoard(board: IBoardCreate, token: string | null) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "POST",
       body: JSON.stringify(board),
     });
@@ -75,10 +75,10 @@ export async function deleteBoard(board: IBoardUpdate, token: string) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "DELETE",
       body: JSON.stringify(board),
     });
@@ -97,10 +97,10 @@ export async function createToDo(todo: ITodo, token: string | null) {
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "POST",
       body: JSON.stringify(todo),
     });
@@ -120,10 +120,10 @@ export async function moveToDo(todo: ITodo, gap: number, token: string) {
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "PUT",
       body: JSON.stringify({ todo: todo, gap: gap }),
     });
@@ -143,10 +143,10 @@ export async function deleteToDo(todo: ITodo, token: string) {
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "DELETE",
       body: JSON.stringify(todo),
     });

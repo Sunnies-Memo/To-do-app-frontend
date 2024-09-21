@@ -6,13 +6,13 @@ export interface IBoardUpdate {
   title: string;
   boardId: string;
   orderIndex: number;
-  memberId: number;
+  username: string;
 }
 
 export interface IBoardCreate {
   title: string;
   orderIndex: number;
-  memberId: number;
+  username: string;
 }
 
 export interface IToDoState {

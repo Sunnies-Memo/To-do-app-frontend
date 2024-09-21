@@ -128,7 +128,7 @@ function BoardForm({ token }: { token: string | null }) {
     const newBoard = {
       title: title,
       orderIndex: lastBIndex + 40,
-      memberId: userData.memberId,
+      username: userData.username,
     };
     createBoardMutation.mutate(newBoard);
     setValue("title", "");

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../util";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ILoginForm } from "../interface/auth-interface";
 
 export const AuthWrapper = styled.div`
@@ -27,7 +27,7 @@ const LoginSumbitBtn = styled.button``;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLogin } = useAuth();
   const {
     handleSubmit,
     register,
@@ -36,6 +36,13 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<ILoginForm>();
   const [formError, setFormError] = useState<String | null>(null);
+
+  useEffect(() => {
+    if (isLogin() !== null) {
+      console.log("already login");
+      navigate("/todos");
+    }
+  }, [isLogin, navigate]);
   const onSubmit = async (data: ILoginForm) => {
     try {
       await login(data);

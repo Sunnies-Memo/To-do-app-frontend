@@ -5,6 +5,7 @@ import {
   useRecoilState,
   useRecoilValue,
   useResetRecoilState,
+  useSetRecoilState,
 } from "recoil";
 import {
   boardState,
@@ -17,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { IBoard, IBoardUpdate, IToDoState } from "./interface/todo-interface";
 import _ from "lodash";
 import { doLogin, doLogout, doRefresh } from "./api/auth-api";
-import { ILoginForm } from "./interface/auth-interface";
+import { ILoginForm, ILoginResponse } from "./interface/auth-interface";
 
 export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   const [enabled, setEnabled] = useState(false);
@@ -41,26 +42,36 @@ export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
 export const useAuth = () => {
   const isAuthed = useRecoilValue(isAuthenticated);
   const [token, setToken] = useRecoilState(userToken);
+  const setUserState = useSetRecoilState(userState);
   const resetUserState = useResetRecoilState(userState);
   const navigate = useNavigate();
 
   const logout = useCallback(async () => {
-    const response = await doLogout();
-    if (response.ok) {
+    const response = await doLogout(token);
+    if (response) {
       resetUserState();
       setToken("");
       navigate("/login");
     }
-  }, [navigate, resetUserState, setToken]);
+  }, [navigate, resetUserState, setToken, token]);
 
   const isLogin = useCallback(() => {
     return isAuthed ? token : null;
   }, [isAuthed, token]);
 
   const login = async (loginForm: ILoginForm) => {
-    const accessToken: string = await doLogin(loginForm);
-    if (accessToken !== null) {
-      setToken((prev) => (prev === accessToken ? prev : accessToken));
+    const loginResponse: ILoginResponse = await doLogin(loginForm);
+    console.log("login response", loginResponse);
+    if (loginResponse !== null) {
+      console.log("accessToken", loginResponse.accessToken);
+      setUserState({
+        username: loginResponse.member.username,
+        profileImg: loginResponse.member.profileImg,
+        bgImg: loginResponse.member.bgImg,
+      });
+      setToken((prev) =>
+        prev === loginResponse.accessToken ? prev : loginResponse.accessToken
+      );
     } else {
       throw new Error("Fail to Login");
     }
@@ -129,6 +140,8 @@ export const useUpdateToDos = () => {
         }
       }
     });
+    console.log("prevBoards", prevBoards);
+    console.log("prevTodoStates", prevTodoStates);
     set(boardState, prevBoards);
     set(toDoState, prevTodoStates);
   });
