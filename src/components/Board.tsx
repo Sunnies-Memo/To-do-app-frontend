@@ -8,6 +8,7 @@ import { IBoard, ITodo } from "../interface/todo-interface";
 import { useAuth } from "../util";
 import { createToDo } from "../api/todo-api";
 import DragableCard from "./DragableCard";
+import { useNavigate } from "react-router-dom";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -68,6 +69,7 @@ interface IBoardProps {
 
 function Board({ index, toDos, board }: IBoardProps) {
   console.log("rendering Board : " + board.title, index, toDos, board);
+  const navigate = useNavigate();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
   const { isLogin } = useAuth();
@@ -98,6 +100,7 @@ function Board({ index, toDos, board }: IBoardProps) {
       });
       setValue("text", "");
     } catch {
+      navigate("/login");
       return;
     }
   };

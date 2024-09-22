@@ -51,10 +51,14 @@ export default function TodosPage() {
   const [showTrashCan, setShowTrashCan] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: fetchedData } = useQuery<IBoard[]>({
+  const { data: fetchedData, isError } = useQuery<IBoard[]>({
     queryKey: ["boards data", token],
     queryFn: async () => getBoards(token),
   });
+
+  if (isError) {
+    navigate("/login");
+  }
 
   useEffect(() => {
     if (!isLogin()) {

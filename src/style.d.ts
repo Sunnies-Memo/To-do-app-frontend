@@ -5,6 +5,10 @@ declare module "styled-components" {
     bgColor: string;
     boardColor: string;
     cardColor: string;
+    btnColor: {
+      btnDefault: string;
+      btnHover: string;
+    };
     themeBlue: {
       ligthBlue: string;
     };

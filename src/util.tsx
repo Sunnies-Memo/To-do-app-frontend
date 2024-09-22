@@ -140,8 +140,6 @@ export const useUpdateToDos = () => {
         }
       }
     });
-    console.log("prevBoards", prevBoards);
-    console.log("prevTodoStates", prevTodoStates);
     set(boardState, prevBoards);
     set(toDoState, prevTodoStates);
   });

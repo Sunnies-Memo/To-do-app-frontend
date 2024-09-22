@@ -3,7 +3,7 @@ import { IUserProfileUpdateRequest } from "../interface/profie-interface";
 
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/member`;
 
-export async function getProfile(token: string) {
+export async function getProfile(token: string | null) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -16,6 +16,7 @@ export async function getProfile(token: string) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
+    return await response.json();
   } catch (error) {
     throw new Error("Fail to get a profile");
   }
@@ -23,7 +24,7 @@ export async function getProfile(token: string) {
 
 export async function changePassword(
   passwordChangeRequest: IPasswordChange,
-  token: string
+  token: string | null
 ) {
   try {
     const response = await fetch(`${BASE_URL}/password`, {
@@ -39,6 +40,7 @@ export async function changePassword(
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
+    return await response.json();
   } catch (error) {
     throw new Error("Fail to change password");
   }
@@ -46,7 +48,7 @@ export async function changePassword(
 
 export async function uploadProfileImg(
   data: IUserProfileUpdateRequest,
-  token: string
+  token: string | null
 ) {
   const form = new FormData();
   form.append("username", data.username);
@@ -64,6 +66,7 @@ export async function uploadProfileImg(
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
+    return await response.json();
   } catch (error) {
     console.error("Failed to login:", error);
     throw new Error("Fail to upload profile image");
@@ -72,7 +75,7 @@ export async function uploadProfileImg(
 
 export async function uploadBgImg(
   data: IUserProfileUpdateRequest,
-  token: string
+  token: string | null
 ) {
   const form = new FormData();
   form.append("username", data.username);
@@ -90,6 +93,7 @@ export async function uploadBgImg(
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
+    return await response.json();
   } catch (error) {
     console.error("Failed to login:", error);
     throw new Error("Fail to upload background image");
