@@ -1,8 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useResetRecoilState } from "recoil";
 import { userState } from "../atoms";
 import styled from "styled-components";
 import { useAuth } from "../util";
+import { useEffect } from "react";
 
 const NavWrapper = styled.div`
   position: fixed;
@@ -24,7 +25,14 @@ const Ul = styled.ul`
 export interface ILocation {}
 export default function NavigationBar() {
   const location = useLocation();
-  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const { logout, isLogin } = useAuth();
+  useEffect(() => {
+    if (isLogin() == null) {
+      navigate("/login");
+    }
+  }, [isLogin, navigate]);
+
   return (
     <>
       {location.pathname === "/login" ||

@@ -66,6 +66,9 @@ a:hover{
 *{
   box-sizing: border-box;
 }
+.clickable:hover{
+  cursor: pointer;
+}
 `
 
 export const Reset = createGlobalStyle`${reset}`;

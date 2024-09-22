@@ -2,37 +2,40 @@ import { useForm } from "react-hook-form";
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
 import { lastBoardIndex, userState } from "../atoms";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
 
 import { createBoard } from "../api/todo-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const Wrapper = styled(motion.div)`
+const Wrapper = styled.div`
   position: fixed;
   display: flex;
   justify-content: center;
-  top: 15px;
-  width: 260px;
+  align-items: center;
+  bottom: 0px;
+  width: 220px;
   height: 30px;
   overflow: visible;
+  z-index: 10;
 `;
-const wrapperVarients = {
-  hover: {
-    scale: 1.05,
-    transition: { duration: 0.3 },
-  },
-};
+const BarWrapper = styled(motion.div)`
+  width: 100%;
+  height: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 const Bar = styled.div`
   width: 100%;
-  height: 5px;
+  height: 7px;
   border-radius: 5px;
-  background-color: dimgray;
+  background-color: ${(props) => props.theme.themeGray.lightGray};
 `;
 const Form = styled(motion.form)`
   position: absolute;
-  bottom: -70px;
+  bottom: 50px;
   width: 250px;
   background-color: ${(props) => props.theme.boardColor};
   display: flex;
@@ -59,7 +62,7 @@ const Form = styled(motion.form)`
   button {
     height: 23px;
     padding: 3px;
-    background-color: #a6a6a6;
+    background-color: ${(props) => props.theme.themeGray.lightGray};
     border: none;
     border-radius: 3px;
     margin-left: 5px;
@@ -68,16 +71,7 @@ const Form = styled(motion.form)`
     cursor: pointer;
   }
 `;
-const formVarients = {
-  start: {
-    opacity: 0,
-    y: 10,
-  },
-  end: {
-    opacity: 1,
-    y: 0,
-  },
-};
+
 const Title = styled.div`
   display: flex;
   justify-content: center;
@@ -89,10 +83,33 @@ const Title = styled.div`
   }
 `;
 
+const barVarients = {
+  initial: {
+    scale: 1,
+  },
+  animate: {
+    scale: [1, 1.05, 1],
+    transition: { duration: 0.2 },
+  },
+};
+
+const formVarients = {
+  start: {
+    opacity: 0,
+    y: 10,
+  },
+  end: {
+    opacity: 1,
+    y: 0,
+  },
+};
+
 function BoardForm({ token }: { token: string | null }) {
   console.log("rendering BoardForm");
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userState);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const lastBIndex = useRecoilValue(lastBoardIndex);
   const [showForm, setShowForm] = useState(false);
@@ -123,6 +140,27 @@ function BoardForm({ token }: { token: string | null }) {
     },
   });
 
+  const handleClickOutside = (event: MouseEvent) => {
+    console.log("handleClick outSide");
+    console.log("div ref", wrapperRef.current);
+    console.log("form ref", formRef.current);
+    if (
+      wrapperRef.current &&
+      !wrapperRef.current.contains(event.target as Node) &&
+      formRef.current &&
+      !formRef.current.contains(event.target as Node)
+    ) {
+      console.log("in if");
+      setShowForm(false);
+    }
+  };
+
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    console.log("handle Click");
+    setShowForm((prev) => !prev);
+  };
+
   const onValid = async ({ title }: IBoardForm) => {
     if (!token) return;
     const newBoard = {
@@ -132,25 +170,36 @@ function BoardForm({ token }: { token: string | null }) {
     };
     createBoardMutation.mutate(newBoard);
     setValue("title", "");
+    setShowForm(false);
   };
 
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <Wrapper
-      variants={wrapperVarients}
-      whileHover={"hover"}
-      onMouseLeave={() => setShowForm(false)}
-      onMouseOver={() => setShowForm(true)}
-    >
-      <Bar />
+    <Wrapper ref={wrapperRef}>
+      <BarWrapper
+        onClick={handleClick}
+        className="clickable"
+        variants={barVarients}
+        initial="initial"
+        whileHover={"animate"}
+      >
+        <Bar onClick={handleClick} className="clickable" />
+      </BarWrapper>
       <AnimatePresence>
         {showForm ? (
           <Form
             onSubmit={handleSubmit(onValid)}
-            onMouseLeave={() => setShowForm(false)}
             variants={formVarients}
             initial={"start"}
             animate={"end"}
             exit={"start"}
+            ref={formRef}
           >
             <Title>
               <span>Create New Board</span>
