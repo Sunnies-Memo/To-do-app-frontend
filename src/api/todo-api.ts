@@ -4,15 +4,20 @@ import {
   IBoardUpdate,
   ITodo,
 } from "../interface/todo-interface";
+import { doRefresh } from "./auth-api";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
-export async function getBoards(token: string | null) {
+export async function getBoards(token: string | null, retry = true) {
   console.log("Fetch : getBoards");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: { Authorization: `Bearer ${token}` },
       credentials: "include",
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      getBoards(newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -24,7 +29,12 @@ export async function getBoards(token: string | null) {
   }
 }
 
-export async function moveBoard(board: IBoard, gap: number, token: string) {
+export async function moveBoard(
+  board: IBoard,
+  gap: number,
+  token: string,
+  retry = true
+) {
   console.log("Fetch : moveBoard : " + board.title);
   try {
     const response = await fetch(`${BASE_URL}`, {
@@ -36,6 +46,10 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
       method: "PUT",
       body: JSON.stringify({ board: board, gap: gap }),
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      moveBoard(board, gap, newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -47,7 +61,11 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
   }
 }
 
-export async function createBoard(board: IBoardCreate, token: string | null) {
+export async function createBoard(
+  board: IBoardCreate,
+  token: string | null,
+  retry = true
+) {
   console.log("Fetch : createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
@@ -59,6 +77,10 @@ export async function createBoard(board: IBoardCreate, token: string | null) {
       method: "POST",
       body: JSON.stringify(board),
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      createBoard(board, newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -70,7 +92,11 @@ export async function createBoard(board: IBoardCreate, token: string | null) {
   }
 }
 
-export async function deleteBoard(board: IBoardUpdate, token: string) {
+export async function deleteBoard(
+  board: IBoardUpdate,
+  token: string,
+  retry = true
+) {
   console.log("Fetch : deleteBoard");
   try {
     const response = await fetch(`${BASE_URL}`, {
@@ -82,6 +108,10 @@ export async function deleteBoard(board: IBoardUpdate, token: string) {
       method: "DELETE",
       body: JSON.stringify(board),
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      deleteBoard(board, newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);

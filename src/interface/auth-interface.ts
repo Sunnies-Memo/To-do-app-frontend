@@ -17,3 +17,9 @@ export interface IUserState {
   bgImg?: string;
   profileImg?: string;
 }
+
+export interface IPasswordChange {
+  username: string;
+  oldPassword: string;
+  newPassword: string;
+}

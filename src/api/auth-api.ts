@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { ILoginForm, IRegisterForm } from "../interface/auth-interface";
 
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/auth`;
@@ -76,7 +77,8 @@ export async function doRefresh() {
     });
 
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      return data.accessToken;
     } else {
       throw new Error("Failed to refresh token");
     }

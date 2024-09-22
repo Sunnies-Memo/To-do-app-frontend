@@ -45,8 +45,8 @@ export const userToken = atom({
 export const isAuthenticated = selector({
   key: "isAuthenticated",
   get: ({ get }) => {
-    const data = get(userState);
-    if (data.username !== null && data.username.length > 0) return true;
+    const token = get(userToken);
+    if (token !== null && token.length > 0) return true;
     else return false;
   },
 });

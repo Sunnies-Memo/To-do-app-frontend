@@ -1,0 +1,97 @@
+import { IPasswordChange } from "../interface/auth-interface";
+import { IUserProfileUpdateRequest } from "../interface/profie-interface";
+
+const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/member`;
+
+export async function getProfile(token: string) {
+  try {
+    const response = await fetch(`${BASE_URL}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      method: "GET",
+    });
+    if (!response.ok) {
+      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    throw new Error("Fail to get a profile");
+  }
+}
+
+export async function changePassword(
+  passwordChangeRequest: IPasswordChange,
+  token: string
+) {
+  try {
+    const response = await fetch(`${BASE_URL}/password`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      method: "PUT",
+      body: JSON.stringify({ passwordChangeRequest }),
+    });
+    if (!response.ok) {
+      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    throw new Error("Fail to change password");
+  }
+}
+
+export async function uploadProfileImg(
+  data: IUserProfileUpdateRequest,
+  token: string
+) {
+  const form = new FormData();
+  form.append("username", data.username);
+  data.profileImg && form.append("profileImg", data.profileImg);
+  try {
+    const response = await fetch(`${BASE_URL}/profileImg`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      method: "POST",
+      body: form,
+    });
+    if (!response.ok) {
+      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    console.error("Failed to login:", error);
+    throw new Error("Fail to upload profile image");
+  }
+}
+
+export async function uploadBgImg(
+  data: IUserProfileUpdateRequest,
+  token: string
+) {
+  const form = new FormData();
+  form.append("username", data.username);
+  data.bgImg && form.append("bgImg", data.bgImg);
+  try {
+    const response = await fetch(`${BASE_URL}/profileImg`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      method: "POST",
+      body: form,
+    });
+    if (!response.ok) {
+      const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    console.error("Failed to login:", error);
+    throw new Error("Fail to upload background image");
+  }
+}
