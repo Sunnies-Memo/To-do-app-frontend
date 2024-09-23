@@ -1,5 +1,5 @@
 import { IPasswordChange } from "../interface/auth-interface";
-import { IUserProfileUpdateRequest } from "../interface/profie-interface";
+import { IUploadImg } from "../interface/profie-interface";
 
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/member`;
 
@@ -46,13 +46,10 @@ export async function changePassword(
   }
 }
 
-export async function uploadProfileImg(
-  data: IUserProfileUpdateRequest,
-  token: string | null
-) {
+export async function uploadProfileImg(data: IUploadImg, token: string | null) {
   const form = new FormData();
   form.append("username", data.username);
-  data.profileImg && form.append("profileImg", data.profileImg);
+  data.imgData && form.append("profileImg", data.imgData);
   try {
     const response = await fetch(`${BASE_URL}/profileImg`, {
       headers: {
@@ -73,13 +70,10 @@ export async function uploadProfileImg(
   }
 }
 
-export async function uploadBgImg(
-  data: IUserProfileUpdateRequest,
-  token: string | null
-) {
+export async function uploadBgImg(data: IUploadImg, token: string | null) {
   const form = new FormData();
   form.append("username", data.username);
-  data.bgImg && form.append("bgImg", data.bgImg);
+  data.imgData && form.append("bgImg", data.imgData);
   try {
     const response = await fetch(`${BASE_URL}/profileImg`, {
       headers: {

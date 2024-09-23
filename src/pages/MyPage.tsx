@@ -34,6 +34,13 @@ const MyPageBox = styled(motion.div)`
   background-color: ${(props) => props.theme.boardColor};
 `;
 
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
 export default function MyPage() {
   const queryClient = useQueryClient();
   const { isLogin } = useAuth();
@@ -41,21 +48,6 @@ export default function MyPage() {
   const { data: profileData } = useQuery<IUserProfile>({
     queryKey: ["userProfile"],
     queryFn: async () => getProfile(token),
-  });
-  const uploadProfileImgMutation = useMutation({
-    mutationFn: (data: IUserProfileUpdateRequest) =>
-      uploadProfileImg(data, token),
-    onError: () => {},
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-    },
-  });
-  const uploadBgImgMutation = useMutation({
-    mutationFn: (data: IUserProfileUpdateRequest) => uploadBgImg(data, token),
-    onError: () => {},
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-    },
   });
   const changePwdMutation = useMutation({
     mutationFn: (data: IPasswordChange) => changePassword(data, token),
@@ -67,7 +59,22 @@ export default function MyPage() {
 
   return (
     <Wrapper>
-      <MyPageBox></MyPageBox>
+      <MyPageBox>
+        <UserInfo>
+          <div>
+            <label htmlFor="mypage-username">Username</label>
+            <input
+              id="mypage-username"
+              type="text"
+              value={profileData?.username}
+            />
+          </div>
+          <div>
+            <label htmlFor="mypage-password">Password</label>
+            <input type="password" value={"00000000"} />
+          </div>
+        </UserInfo>
+      </MyPageBox>
     </Wrapper>
   );
 }

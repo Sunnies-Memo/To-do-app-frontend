@@ -7,7 +7,7 @@ import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { useAuth } from "../util";
 import { createToDo } from "../api/todo-api";
-import DragableCard from "./DragableCard";
+import DragableCard from "./dragable-card";
 import { useNavigate } from "react-router-dom";
 
 interface IAreaProps {

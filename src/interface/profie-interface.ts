@@ -7,3 +7,8 @@ export interface IUserProfile {
   profileImg?: File | null;
   bgImg?: File | null;
 }
+
+export interface IUploadImg {
+  username: string;
+  imgData: File | null;
+}

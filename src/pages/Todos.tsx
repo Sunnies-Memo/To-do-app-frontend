@@ -3,8 +3,8 @@ import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
 import { Suspense, useEffect, useState } from "react";
-import BoardForm from "../components/CreateBoard";
-import Board from "../components/Board";
+import BoardForm from "../components/create-board";
+
 import TrashCan from "../components/TrashBin";
 import { StrictModeDroppable, useAuth, useUpdateToDos } from "../util";
 import { IBoard, IBoardUpdate, IToDoState } from "../interface/todo-interface";
@@ -17,6 +17,7 @@ import {
 } from "../api/todo-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import Board from "../components/board";
 
 const Wrapper = styled.div`
   display: flex;
