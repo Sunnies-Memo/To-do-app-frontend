@@ -1,20 +1,33 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { IUploadImg } from "../interface/profie-interface";
 import { Spinner } from "@material-tailwind/react";
+import styled from "styled-components";
+import { DropZoneProps } from "../interface/profie-interface";
 
-export interface DropZoneProps {
-  hasTempImg?: boolean;
-  username: string;
-  fileSort: string;
-  token: string;
-  uploadFn: (data: IUploadImg, token: string) => Promise<any>;
+interface IZoneSize {
   size: {
     width: string;
-    heigth: string;
+    height: string;
   };
 }
+
+const Zone = styled.div<IZoneSize>`
+  border: 2px dotted ${(props) => props.theme.dropArea.fromThis};
+  height: ${(props) => props.size.height};
+  width: ${(props) => props.size.width};
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  &:hover {
+    cursor: pointer;
+  }
+  p {
+    font-size: 13px;
+  }
+`;
 
 export function ImageDropZone({
   hasTempImg,
@@ -49,7 +62,7 @@ export function ImageDropZone({
   const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <div {...getRootProps()}>
+    <Zone {...getRootProps()} size={size}>
       <input {...getInputProps()} />
       {uploadImgMutation.isPending ? (
         <Spinner
@@ -59,8 +72,11 @@ export function ImageDropZone({
       ) : isDragActive ? (
         <p>Drop your image here!</p>
       ) : (
-        <p>Drag or upload your image here!</p>
+        <>
+          <p>Drag here or click</p>
+          <p>to upload your image!</p>
+        </>
       )}
-    </div>
+    </Zone>
   );
 }

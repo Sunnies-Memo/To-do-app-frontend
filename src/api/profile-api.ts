@@ -26,6 +26,7 @@ export async function changePassword(
   passwordChangeRequest: IPasswordChange,
   token: string | null
 ) {
+  console.log("change password api", passwordChangeRequest);
   try {
     const response = await fetch(`${BASE_URL}/password`, {
       headers: {
@@ -34,7 +35,7 @@ export async function changePassword(
       },
       credentials: "include",
       method: "PUT",
-      body: JSON.stringify({ passwordChangeRequest }),
+      body: JSON.stringify(passwordChangeRequest),
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;

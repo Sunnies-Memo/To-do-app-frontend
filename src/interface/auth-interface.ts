@@ -24,3 +24,7 @@ export interface IPasswordChange {
   oldPassword: string;
   newPassword: string;
 }
+
+export interface IPasswordChangeForm extends IPasswordChange {
+  newPassword2: string;
+}

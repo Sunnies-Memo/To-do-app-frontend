@@ -69,6 +69,9 @@ a:hover{
 .clickable:hover{
   cursor: pointer;
 }
+button:hover{
+  cursor: pointer;
+}
 `
 
 export const Reset = createGlobalStyle`${reset}`;

@@ -14,8 +14,8 @@ export const defaultTheme: DefaultTheme = {
     hover: "#f0aaff",
   },
   btnColor: {
-    btnDefault: "#C68FE6",
-    btnHover: "#6C48C5",
+    btnDefault: "#89c9ff",
+    btnHover: "#bfe9ff",
   },
   bigBtn: {
     default: "#89c9ff",
