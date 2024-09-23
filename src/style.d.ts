@@ -5,6 +5,11 @@ declare module "styled-components" {
     bgColor: string;
     boardColor: string;
     cardColor: string;
+    dropArea: {
+      default: string;
+      draggingOver: string;
+      fromThis: string;
+    };
     btnColor: {
       btnDefault: string;
       btnHover: string;
@@ -15,6 +20,10 @@ declare module "styled-components" {
     themeGray: {
       thickGray: string;
       lightGray: string;
+    };
+    bigBtn: {
+      default: string;
+      hover: string;
     };
   }
 }

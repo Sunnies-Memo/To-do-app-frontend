@@ -5,6 +5,7 @@ export interface ILoginForm {
 
 export interface IRegisterForm extends ILoginForm {
   profileImg?: string;
+  password2?: string;
 }
 
 export interface ILoginResponse {

@@ -63,7 +63,7 @@ const Form = styled(motion.form)`
   button {
     height: 23px;
     padding: 3px;
-    background-color: ${(props) => props.theme.themeGray.lightGray};
+    background-color: ${(props) => props.theme.dropArea.default};
     border: none;
     border-radius: 3px;
     margin-left: 5px;

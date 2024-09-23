@@ -18,10 +18,10 @@ interface IAreaProps {
 const Area = styled.div<IAreaProps>`
   background-color: ${(props) =>
     props.isDraggingOver
-      ? props.theme.themeBlue.ligthBlue
+      ? props.theme.dropArea.draggingOver
       : props.isDraggingFromThis
-      ? props.theme.themeGray.thickGray
-      : props.theme.themeGray.lightGray};
+      ? props.theme.dropArea.fromThis
+      : props.theme.dropArea.default};
   width: 95%;
   flex-grow: 1;
   transition: background-color 0.3s ease-in-out;

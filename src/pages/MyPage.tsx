@@ -12,13 +12,26 @@ import {
   uploadProfileImg,
 } from "../api/profile-api";
 import { IPasswordChange } from "../interface/auth-interface";
+import { motion } from "framer-motion";
 
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  border: 1px solid black;
+`;
+
+const MyPageBox = styled(motion.div)`
+  display: flex;
+  width: 60%;
+  min-width: 300px;
+  height: 50%;
+  min-height: 400px;
+  margin-bottom: 15%;
+  border-radius: 5px;
+  background-color: ${(props) => props.theme.boardColor};
 `;
 
 export default function MyPage() {
@@ -52,5 +65,9 @@ export default function MyPage() {
     },
   });
 
-  return <Wrapper></Wrapper>;
+  return (
+    <Wrapper>
+      <MyPageBox></MyPageBox>
+    </Wrapper>
+  );
 }

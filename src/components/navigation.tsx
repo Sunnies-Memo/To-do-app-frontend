@@ -22,36 +22,41 @@ const TabWrapper = styled.div`
   background-color: ${(props) => props.theme.boardColor};
 `;
 
-const Selector = styled(motion.div)`
-  width: 100%;
-  height: 100%;
-`;
-
 const Ul = styled.ul`
   display: flex;
   align-items: center;
+  background-color: ${(props) => props.theme.dropArea.default};
+  border-radius: 5px;
+  margin: 2px 0 2px 0;
   li {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100px;
+    height: 30px;
     padding: 5px 0px 5px 0px;
-    margin: 1px 2px 1px 2px;
-    border-radius: 5px;
-    background-color: #8eaccd;
+
     color: beige;
   }
 `;
+const Selector = styled(motion.div)`
+  position: absolute;
+  width: 100px;
+  height: 30px;
+  background-color: rgba(189, 225, 255, 0.4);
+  border-radius: 5px;
+`;
+
 const LogoutBtn = styled.button`
   margin: 0 4px 0 24px;
   padding: 0 10px 0 10px;
   height: 28px;
   border: none;
   border-radius: 5px;
-  background-color: #f19ed2;
+  background-color: ${(props) => props.theme.logoutBtn.default};
   color: beige;
   &:hover {
-    background-color: #e8c5e5;
+    background-color: ${(props) => props.theme.logoutBtn.hover};
     cursor: pointer;
   }
 `;
@@ -64,7 +69,7 @@ export default function NavigationBar() {
   const navigate = useNavigate();
   const { logout, isLogin } = useAuth();
   useEffect(() => {
-    if (isLogin() == null) {
+    if (isLogin() == null && location.pathname !== "/join") {
       navigate("/login");
     }
   }, [isLogin, navigate]);

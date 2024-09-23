@@ -33,7 +33,8 @@ const DeleteToDoBox = styled.div<IDeleteTodoBox>`
   background-color: ${(props) => props.theme.boardColor};
   border-radius: 5px;
   svg {
-    fill: ${(props) => (props.isDraggingOver ? "#FA4A23" : "dimgray")};
+    fill: ${(props) =>
+      props.isDraggingOver ? "#FA4A23" : props.theme.dropArea.default};
     width: 20px;
   }
 `;
