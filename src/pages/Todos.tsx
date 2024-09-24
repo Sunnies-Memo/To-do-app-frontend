@@ -2,11 +2,11 @@ import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
-import { Suspense, useCallback, useEffect, useState } from "react";
-import BoardForm from "../components/CreateBoard";
-import Board from "../components/Board";
+import { Suspense, useEffect, useState } from "react";
+import BoardForm from "../components/create-board";
+
 import TrashCan from "../components/TrashBin";
-import { StrictModeDroppable, useAuth } from "../util";
+import { StrictModeDroppable, useAuth, useUpdateToDos } from "../util";
 import { IBoard, IBoardUpdate, IToDoState } from "../interface/todo-interface";
 import {
   deleteBoard,
@@ -15,6 +15,9 @@ import {
   moveBoard,
   moveToDo,
 } from "../api/todo-api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import Board from "../components/board";
 
 const Wrapper = styled.div`
   display: flex;
@@ -34,8 +37,10 @@ const Boards = styled.div`
 `;
 
 export default function TodosPage() {
-  console.log("rendering TodosPage");
-  const isLogin = useAuth();
+  const navigate = useNavigate();
+  const { isLogin } = useAuth();
+  const token = isLogin();
+  const updateData = useUpdateToDos();
   const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
   const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
 
@@ -45,40 +50,30 @@ export default function TodosPage() {
   const [boardDrop, setBoardDrop] = useState(false);
   const [showTrashCan, setShowTrashCan] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    const token = isLogin();
-    if (token !== null) {
+  const queryClient = useQueryClient();
+  const { data: fetchedData, isError } = useQuery<IBoard[]>({
+    queryKey: ["boards data", token],
+    queryFn: async () => getBoards(token),
+  });
+
+  if (isError) {
+    navigate("/login");
+  }
+
+  useEffect(() => {
+    if (!isLogin()) {
+      navigate("/login");
+    }
+    if (fetchedData != null) {
       try {
-        const toDosData: IBoard[] = await getBoards(token);
-
-        let boardlist: IBoardUpdate[] = [];
-        toDosData.forEach((board) => {
-          board.boardId &&
-            boardlist.push({
-              title: board.title,
-              boardId: board.boardId,
-              orderIndex: board.orderIndex,
-              memberId: board.memberId,
-            });
-        });
-        setBoards(boardlist);
-
-        const obj = toDosData.reduce<IToDoState>((acc, cur) => {
-          acc[cur.title] = cur.toDoList ? cur.toDoList : [];
-          return acc;
-        }, {});
-
-        setToDos(obj);
+        updateData(fetchedData);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");
       }
     }
-  }, [isLogin]);
-  const refetch = async () => fetchData();
-  useEffect(() => {
-    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchedData, isLogin]);
+
   useEffect(() => {
     if (boards.length > 0) {
       setLastBIndex((prev) => {
@@ -133,6 +128,10 @@ export default function TodosPage() {
         //맨 뒤로 이동
         prevIndex = boards[destination.index].orderIndex;
         nextIndex = null;
+      } else if (boards[source.index - 1] == null) {
+        //맨 앞에서 뒤로 이동
+        prevIndex = boards[destination.index].orderIndex;
+        nextIndex = boards[destination.index + 1].orderIndex;
       } else {
         prevIndex = boards[destination.index - 1].orderIndex;
         nextIndex = boards[destination.index].orderIndex;
@@ -166,21 +165,20 @@ export default function TodosPage() {
       });
 
       await moveBoard(thisBoard, gap, token);
-      console.log("gap : ", gap);
       if (gap <= 3) {
-        console.log("refetch");
-        refetch();
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
       }
     } else if (destination.droppableId === source.droppableId) {
       //같은 board간 이동
       //db의 todo card orderIndex 수정
       let prevIndex: number | undefined;
       let nextIndex: number | undefined;
+
       if (
-        toDos[boards[Number(source.droppableId)].title][
+        toDos[boards[Number(source.droppableId)].boardId][
           destination.index - 1
         ] === undefined &&
-        toDos[boards[Number(source.droppableId)].title][
+        toDos[boards[Number(source.droppableId)].boardId][
           destination.index + 1
         ] === undefined
       ) {
@@ -188,31 +186,43 @@ export default function TodosPage() {
         prevIndex = undefined;
         nextIndex = undefined;
       } else if (
-        toDos[boards[Number(source.droppableId)].title][
+        toDos[boards[Number(source.droppableId)].boardId][
           destination.index - 1
         ] === undefined
       ) {
         //맨 앞으로 이동
         prevIndex = undefined;
         nextIndex =
-          toDos[boards[Number(source.droppableId)].title][destination.index]
+          toDos[boards[Number(source.droppableId)].boardId][destination.index]
             .orderIndex;
       } else if (
-        toDos[boards[Number(source.droppableId)].title][
+        toDos[boards[Number(source.droppableId)].boardId][
           destination.index + 1
         ] === undefined
       ) {
         //맨 뒤로 이동
         prevIndex =
-          toDos[boards[Number(source.droppableId)].title][destination.index]
+          toDos[boards[Number(source.droppableId)].boardId][destination.index]
             .orderIndex;
         nextIndex = undefined;
-      } else {
+      } else if (
+        toDos[boards[Number(source.droppableId)].boardId][source.index - 1] ===
+        undefined
+      ) {
         prevIndex =
-          toDos[boards[Number(source.droppableId)].title][destination.index - 1]
+          toDos[boards[Number(source.droppableId)].boardId][destination.index]
             .orderIndex;
         nextIndex =
-          toDos[boards[Number(source.droppableId)].title][destination.index]
+          toDos[boards[Number(source.droppableId)].boardId][
+            destination.index + 1
+          ].orderIndex;
+      } else {
+        prevIndex =
+          toDos[boards[Number(source.droppableId)].boardId][
+            destination.index - 1
+          ].orderIndex;
+        nextIndex =
+          toDos[boards[Number(source.droppableId)].boardId][destination.index]
             .orderIndex;
       }
 
@@ -231,23 +241,25 @@ export default function TodosPage() {
 
       let gap: number = nextIndex ? nextIndex - currIndex : 999;
       let thisTodo = {
-        ...toDos[boards[Number(source.droppableId)].title][source.index],
+        ...toDos[boards[Number(source.droppableId)].boardId][source.index],
         orderIndex: currIndex,
       };
       setToDos((prev) => {
-        const boardCopy = [...prev[boards[Number(source.droppableId)].title]];
+        const boardCopy = [...prev[boards[Number(source.droppableId)].boardId]];
         const taskObj = { ...boardCopy[source.index], orderIndex: currIndex };
         boardCopy.splice(source.index, 1);
         boardCopy.splice(destination?.index, 0, taskObj);
         const newToDoObj = {
           ...prev,
-          [boards[Number(source.droppableId)].title]: boardCopy,
+          [boards[Number(source.droppableId)].boardId]: boardCopy,
         };
         return newToDoObj;
       });
 
       await moveToDo(thisTodo, gap, token);
-      if (gap <= 3) refetch();
+      if (gap <= 3) {
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+      }
     }
 
     if (destination.droppableId === "trashBin") {
@@ -260,23 +272,26 @@ export default function TodosPage() {
         });
         setToDos((prev) => {
           const newObj = { ...prev };
-          delete newObj[boards[source.index].title];
+          delete newObj[boards[source.index].boardId];
           return newObj;
         });
         await deleteBoard(boards[source.index], token);
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
       } else {
         //todo card 삭제
         setToDos((prev) => {
-          const boardCopy = [...prev[boards[Number(source.droppableId)].title]];
+          const boardCopy = [
+            ...prev[boards[Number(source.droppableId)].boardId],
+          ];
           boardCopy.splice(source.index, 1);
           const newToDoObj = {
             ...prev,
-            [boards[Number(source.droppableId)].title]: boardCopy,
+            [boards[Number(source.droppableId)].boardId]: boardCopy,
           };
           return newToDoObj;
         });
         await deleteToDo(
-          toDos[boards[Number(source.droppableId)].title][source.index],
+          toDos[boards[Number(source.droppableId)].boardId][source.index],
           token
         );
       }
@@ -286,10 +301,10 @@ export default function TodosPage() {
       let prevIndex: number | undefined;
       let nextIndex: number | undefined;
       if (
-        toDos[boards[Number(destination.droppableId)].title][
+        toDos[boards[Number(destination.droppableId)].boardId][
           destination.index - 1
         ] === undefined &&
-        toDos[boards[Number(destination.droppableId)].title][
+        toDos[boards[Number(destination.droppableId)].boardId][
           destination.index
         ] === undefined
       ) {
@@ -297,34 +312,34 @@ export default function TodosPage() {
         prevIndex = undefined;
         nextIndex = undefined;
       } else if (
-        toDos[boards[Number(destination.droppableId)].title][
+        toDos[boards[Number(destination.droppableId)].boardId][
           destination.index - 1
         ] === undefined
       ) {
         //맨 앞으로 이동
         prevIndex = undefined;
         nextIndex =
-          toDos[boards[Number(destination.droppableId)].title][
+          toDos[boards[Number(destination.droppableId)].boardId][
             destination.index
           ].orderIndex;
       } else if (
-        toDos[boards[Number(destination.droppableId)].title][
+        toDos[boards[Number(destination.droppableId)].boardId][
           destination.index
         ] === undefined
       ) {
         //맨 뒤로 이동
         prevIndex =
-          toDos[boards[Number(destination.droppableId)].title][
+          toDos[boards[Number(destination.droppableId)].boardId][
             destination.index - 1
           ].orderIndex;
         nextIndex = undefined;
       } else {
         prevIndex =
-          toDos[boards[Number(destination.droppableId)].title][
+          toDos[boards[Number(destination.droppableId)].boardId][
             destination.index - 1
           ].orderIndex;
         nextIndex =
-          toDos[boards[Number(destination.droppableId)].title][
+          toDos[boards[Number(destination.droppableId)].boardId][
             destination.index
           ].orderIndex;
       }
@@ -344,15 +359,17 @@ export default function TodosPage() {
 
       let gap: number = nextIndex ? nextIndex - currIndex : 999;
       let thisTodo = {
-        ...toDos[boards[Number(source.droppableId)].title][source.index],
+        ...toDos[boards[Number(source.droppableId)].boardId][source.index],
         orderIndex: currIndex,
         board: boards[Number(destination.droppableId)],
       };
 
       setToDos((prev) => {
-        const sourceBoard = [...prev[boards[Number(source.droppableId)].title]];
+        const sourceBoard = [
+          ...prev[boards[Number(source.droppableId)].boardId],
+        ];
         const targetBoard = [
-          ...prev[boards[Number(destination.droppableId)].title],
+          ...prev[boards[Number(destination.droppableId)].boardId],
         ];
         const taskObj = {
           ...sourceBoard[source.index],
@@ -363,14 +380,16 @@ export default function TodosPage() {
         targetBoard.splice(destination.index, 0, taskObj);
         const newToDoObj = {
           ...prev,
-          [boards[Number(source.droppableId)].title]: sourceBoard,
-          [boards[Number(destination.droppableId)].title]: targetBoard,
+          [boards[Number(source.droppableId)].boardId]: sourceBoard,
+          [boards[Number(destination.droppableId)].boardId]: targetBoard,
         };
         return newToDoObj;
       });
 
       await moveToDo(thisTodo, gap, token);
-      if (gap <= 3) refetch();
+      if (gap <= 3) {
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+      }
     }
 
     setShowTrashCan(false);
@@ -381,7 +400,7 @@ export default function TodosPage() {
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Wrapper className="wrapper">
           <Suspense fallback={<div>Loading...</div>}>
-            <BoardForm refetch={refetch} />
+            <BoardForm token={token} />
           </Suspense>
           <StrictModeDroppable
             droppableId="boards"
@@ -395,13 +414,12 @@ export default function TodosPage() {
                 {...magic.droppableProps}
               >
                 {boards.map((board, index) => {
-                  console.log("rendering board", board);
                   return (
                     <Board
                       index={index}
                       board={board}
-                      key={board.title}
-                      toDos={toDos[board.title]}
+                      key={board.boardId}
+                      toDos={toDos[board.boardId]}
                     />
                   );
                 })}

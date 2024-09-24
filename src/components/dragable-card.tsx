@@ -16,12 +16,11 @@ const Card = styled.div<ICardProps>`
 `;
 
 interface IDragalbeCard {
-  toDoId?: number;
+  toDoId?: string;
   toDoText: string;
   index: number;
 }
 function DragableCard({ toDoId, toDoText, index }: IDragalbeCard) {
-  console.log("rendering draggableCard : " + toDoId, toDoText);
   return (
     <Draggable key={toDoId} draggableId={"todoCard" + toDoId} index={index}>
       {(magic, snapshot) => (

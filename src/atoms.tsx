@@ -1,25 +1,19 @@
-import { atom, selector } from "recoil";
-import { IBoardUpdate, IToDoState } from "./interface/todo-interface";
+import { atom, atomFamily, selector } from "recoil";
+import { IBoardUpdate, ITodo, IToDoState } from "./interface/todo-interface";
+import { IUserState } from "./interface/auth-interface";
 
-// export const toDoState = atom<IToDoState>({
-//   key: "toDo",
-//   default: {
-//     "to do": [],
-//     doing: [],
-//     done: [],
-//   },
-// });
 export const toDoState = atom<IToDoState>({
   key: "toDo",
   default: {},
 });
 
-// export const boardState = atom({
-//   key: "boards",
-//   default: ["to do", "doing", "done"],
-// });
 export const boardState = atom<IBoardUpdate[]>({
   key: "boards",
+  default: [],
+});
+
+export const toDosFamily = atomFamily<ITodo[], string>({
+  key: "toDosFamily",
   default: [],
 });
 
@@ -33,25 +27,26 @@ export const lastBoardIndex = atom<number>({
   default: 100,
 });
 
-//유저 관련s
-export const userState = atom({
+//유저 관련
+export const userState = atom<IUserState>({
   key: "userState",
   default: {
-    memberId: 1, //null로 바꿔놔야
     username: "",
+    profileImg: undefined,
+    bgImg: undefined,
   },
 });
 
 export const userToken = atom({
-  key: "token",
-  default: "token",
+  key: "accessToken",
+  default: "",
 });
 
 export const isAuthenticated = selector({
   key: "isAuthenticated",
   get: ({ get }) => {
-    const data = get(userState);
-    if (data.memberId !== null) return true;
+    const token = get(userToken);
+    if (token !== null && token.length > 0) return true;
     else return false;
   },
 });

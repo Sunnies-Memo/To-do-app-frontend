@@ -7,7 +7,8 @@ import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { useAuth } from "../util";
 import { createToDo } from "../api/todo-api";
-import DragableCard from "./DragableCard";
+import DragableCard from "./dragable-card";
+import { useNavigate } from "react-router-dom";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -17,10 +18,10 @@ interface IAreaProps {
 const Area = styled.div<IAreaProps>`
   background-color: ${(props) =>
     props.isDraggingOver
-      ? "#62A6DE"
+      ? props.theme.dropArea.draggingOver
       : props.isDraggingFromThis
-      ? "#878787"
-      : "#A6A6A6"};
+      ? props.theme.dropArea.fromThis
+      : props.theme.dropArea.default};
   width: 95%;
   flex-grow: 1;
   transition: background-color 0.3s ease-in-out;
@@ -67,11 +68,11 @@ interface IBoardProps {
 }
 
 function Board({ index, toDos, board }: IBoardProps) {
-  console.log("rendering Board : " + board.title);
+  const navigate = useNavigate();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
+  const { isLogin } = useAuth();
   const setToDos = useSetRecoilState(toDoState);
-  const isLogin = useAuth();
 
   const lastIndexRef = useRef(100);
   useEffect(() => {
@@ -92,18 +93,23 @@ function Board({ index, toDos, board }: IBoardProps) {
       setToDos((prev) => {
         const newToDoObj = {
           ...prev,
-          [board.title]: [...prev[board.title], createdToDo],
+          [board.boardId]: [...prev[board.boardId], createdToDo],
         };
         return newToDoObj;
       });
       setValue("text", "");
     } catch {
+      navigate("/login");
       return;
     }
   };
 
   return (
-    <Draggable key={board.boardId} draggableId={board.title} index={index}>
+    <Draggable
+      key={board.boardId}
+      draggableId={board.boardId + ""}
+      index={index}
+    >
       {(magic) => (
         <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
           <Title {...magic.dragHandleProps}>

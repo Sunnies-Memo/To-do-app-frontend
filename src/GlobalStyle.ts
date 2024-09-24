@@ -1,5 +1,4 @@
-import { css, createGlobalStyle } from 'styled-components';
-
+import { css, createGlobalStyle } from "styled-components";
 
 // prettier-ignore
 export const reset = css`
@@ -61,11 +60,20 @@ a{
   text-decoration: none;
   color:inherit;
 }
+a:hover{
+   cursor: pointer;
+}
 *{
   box-sizing: border-box;
 }
+.clickable:hover{
+  cursor: pointer;
+}
+button:hover{
+  cursor: pointer;
+}
 `
 
-export const Reset = createGlobalStyle`${reset}`
+export const Reset = createGlobalStyle`${reset}`;
 
-export default reset
+export default reset;

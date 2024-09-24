@@ -1,13 +1,22 @@
-import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
+import {
+  IBoard,
+  IBoardCreate,
+  IBoardUpdate,
+  ITodo,
+} from "../interface/todo-interface";
+import { doRefresh } from "./auth-api";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
-export async function getBoards(token: string) {
-  console.log("Fetch : getBoards");
+export async function getBoards(token: string | null, retry = true) {
   try {
     const response = await fetch(`${BASE_URL}`, {
-      //   headers: { Authorization: `Bearer ${token}` },
-      //   credentials: "include",
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      getBoards(newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -19,18 +28,26 @@ export async function getBoards(token: string) {
   }
 }
 
-export async function moveBoard(board: IBoard, gap: number, token: string) {
-  console.log("Fetch : moveBoard : " + board.title);
+export async function moveBoard(
+  board: IBoard,
+  gap: number,
+  token: string,
+  retry = true
+) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "PUT",
       body: JSON.stringify({ board: board, gap: gap }),
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      moveBoard(board, gap, newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -42,18 +59,25 @@ export async function moveBoard(board: IBoard, gap: number, token: string) {
   }
 }
 
-export async function createBoard(board: IBoard, token: string) {
-  console.log("Fetch : createBoard", JSON.stringify(board));
+export async function createBoard(
+  board: IBoardCreate,
+  token: string | null,
+  retry = true
+) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "POST",
       body: JSON.stringify(board),
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      createBoard(board, newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -65,18 +89,25 @@ export async function createBoard(board: IBoard, token: string) {
   }
 }
 
-export async function deleteBoard(board: IBoardUpdate, token: string) {
-  console.log("Fetch : deleteBoard");
+export async function deleteBoard(
+  board: IBoardUpdate,
+  token: string,
+  retry = true
+) {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "DELETE",
       body: JSON.stringify(board),
     });
+    if (response.status === 401 && retry) {
+      const newAccessToken: string = await doRefresh();
+      deleteBoard(board, newAccessToken, (retry = false));
+    }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
@@ -87,15 +118,14 @@ export async function deleteBoard(board: IBoardUpdate, token: string) {
   }
 }
 
-export async function createToDo(todo: ITodo, token: string) {
-  console.log("Fetch : createToDo", JSON.stringify(todo));
+export async function createToDo(todo: ITodo, token: string | null) {
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "POST",
       body: JSON.stringify(todo),
     });
@@ -111,14 +141,13 @@ export async function createToDo(todo: ITodo, token: string) {
 }
 
 export async function moveToDo(todo: ITodo, gap: number, token: string) {
-  console.log("Fetch : moveToDo", JSON.stringify({ todo: todo, gap: gap }));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "PUT",
       body: JSON.stringify({ todo: todo, gap: gap }),
     });
@@ -134,14 +163,13 @@ export async function moveToDo(todo: ITodo, gap: number, token: string) {
 }
 
 export async function deleteToDo(todo: ITodo, token: string) {
-  console.log("Fetch : deleteToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      //   credentials: "include",
+      credentials: "include",
       method: "DELETE",
       body: JSON.stringify(todo),
     });
