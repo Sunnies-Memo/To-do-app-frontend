@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import styled from "styled-components";
-import { IUploadImg, IUserProfile } from "../interface/profie-interface";
+import { IUserProfile } from "../interface/profie-interface";
 import { useAuth } from "../util";
 import {
   changePassword,
@@ -189,7 +189,6 @@ const ImgDropArea = styled.div<IArea>`
   }
 `;
 export default function MyPage() {
-  console.log("my page");
   const queryClient = useQueryClient();
   const { isLogin } = useAuth();
   const token = isLogin();
@@ -209,9 +208,6 @@ export default function MyPage() {
   });
   const changePwdMutation = useMutation({
     mutationFn: (data: IPasswordChange) => changePassword(data, token),
-    onError: () => {
-      console.log("change password error");
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
     },
@@ -222,14 +218,12 @@ export default function MyPage() {
   const onValid = async (data: IPasswordChangeForm) => {
     try {
       if (data.newPassword !== data.newPassword2) {
-        console.log("diffrent password");
         throw new Error("check your password again");
       }
       changePwdMutation.mutate(data);
       setIsPwdCng(false);
     } catch (error) {
       alert("Fail to change password");
-      console.log("Fail to change password");
     }
   };
   useEffect(() => {

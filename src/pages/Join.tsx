@@ -96,8 +96,6 @@ export default function JoinPage() {
     handleSubmit,
     register,
     formState: { errors },
-    setValue,
-    setError,
     watch,
   } = useForm<IRegisterForm>();
   const password = watch("password");
@@ -110,7 +108,6 @@ export default function JoinPage() {
       navigate("/login");
     } catch (error) {
       alert("Fail to sign in");
-      console.log("가입실패");
     }
   };
 

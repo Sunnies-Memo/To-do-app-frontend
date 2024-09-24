@@ -106,7 +106,6 @@ const formVarients = {
 };
 
 function BoardForm({ token }: { token: string | null }) {
-  console.log("rendering BoardForm");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userState);
@@ -144,23 +143,18 @@ function BoardForm({ token }: { token: string | null }) {
   });
 
   const handleClickOutside = (event: MouseEvent) => {
-    console.log("handleClick outSide");
-    console.log("div ref", wrapperRef.current);
-    console.log("form ref", formRef.current);
     if (
       wrapperRef.current &&
       !wrapperRef.current.contains(event.target as Node) &&
       formRef.current &&
       !formRef.current.contains(event.target as Node)
     ) {
-      console.log("in if");
       setShowForm(false);
     }
   };
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    console.log("handle Click");
     setShowForm((prev) => !prev);
   };
 

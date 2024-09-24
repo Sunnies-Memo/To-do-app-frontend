@@ -56,18 +56,11 @@ const Span = styled.div`
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, isLogin } = useAuth();
-  const {
-    handleSubmit,
-    register,
-    setValue,
-    setError,
-    formState: { errors },
-  } = useForm<ILoginForm>();
+  const { handleSubmit, register } = useForm<ILoginForm>();
   const [formError, setFormError] = useState<String | null>(null);
 
   useEffect(() => {
     if (isLogin() !== null) {
-      console.log("already login");
       navigate("/todos");
     }
   }, [isLogin, navigate]);

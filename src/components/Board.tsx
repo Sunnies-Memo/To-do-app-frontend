@@ -68,7 +68,6 @@ interface IBoardProps {
 }
 
 function Board({ index, toDos, board }: IBoardProps) {
-  console.log("rendering Board : " + board.title, index, toDos, board);
   const navigate = useNavigate();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);

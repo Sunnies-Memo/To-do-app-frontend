@@ -8,7 +8,6 @@ import { doRefresh } from "./auth-api";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
 export async function getBoards(token: string | null, retry = true) {
-  console.log("Fetch : getBoards");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -35,7 +34,6 @@ export async function moveBoard(
   token: string,
   retry = true
 ) {
-  console.log("Fetch : moveBoard : " + board.title);
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -66,7 +64,6 @@ export async function createBoard(
   token: string | null,
   retry = true
 ) {
-  console.log("Fetch : createBoard", JSON.stringify(board));
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -97,7 +94,6 @@ export async function deleteBoard(
   token: string,
   retry = true
 ) {
-  console.log("Fetch : deleteBoard");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -123,7 +119,6 @@ export async function deleteBoard(
 }
 
 export async function createToDo(todo: ITodo, token: string | null) {
-  console.log("Fetch : createToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
@@ -146,7 +141,6 @@ export async function createToDo(todo: ITodo, token: string | null) {
 }
 
 export async function moveToDo(todo: ITodo, gap: number, token: string) {
-  console.log("Fetch : moveToDo", JSON.stringify({ todo: todo, gap: gap }));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {
@@ -169,7 +163,6 @@ export async function moveToDo(todo: ITodo, gap: number, token: string) {
 }
 
 export async function deleteToDo(todo: ITodo, token: string) {
-  console.log("Fetch : deleteToDo", JSON.stringify(todo));
   try {
     const response = await fetch(`${BASE_URL}/todo`, {
       headers: {

@@ -37,7 +37,6 @@ const Boards = styled.div`
 `;
 
 export default function TodosPage() {
-  console.log("rendering TodosPage");
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   const token = isLogin();
@@ -63,7 +62,6 @@ export default function TodosPage() {
 
   useEffect(() => {
     if (!isLogin()) {
-      console.log("로그인 안돼있음");
       navigate("/login");
     }
     if (fetchedData != null) {
@@ -73,6 +71,7 @@ export default function TodosPage() {
         alert("데이터를 가져오지 못했습니다.");
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedData, isLogin]);
 
   useEffect(() => {

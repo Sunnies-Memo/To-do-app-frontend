@@ -26,7 +26,6 @@ export async function changePassword(
   passwordChangeRequest: IPasswordChange,
   token: string | null
 ) {
-  console.log("change password api", passwordChangeRequest);
   try {
     const response = await fetch(`${BASE_URL}/password`, {
       headers: {
