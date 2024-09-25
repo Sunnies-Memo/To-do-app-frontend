@@ -59,6 +59,8 @@ export async function uploadProfileImg(data: IUploadImg, token: string | null) {
       method: "POST",
       body: form,
     });
+    console.log("response", await response);
+    console.log("response.json()", await response.json());
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);

@@ -42,6 +42,7 @@ export function ImageDropZone({
     mutationFn: (data: File) => uploadFn({ username, imgData: data }, token),
     onError: () => {
       // 에러 핸들링
+      alert("Fail to upload image.");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
