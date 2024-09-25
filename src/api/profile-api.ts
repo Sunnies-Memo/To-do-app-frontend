@@ -59,13 +59,11 @@ export async function uploadProfileImg(data: IUploadImg, token: string | null) {
       method: "POST",
       body: form,
     });
-    console.log("response", await response);
-    console.log("response.json()", await response.json());
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
       throw new Error(errorMessage);
     }
-    return await response.json();
+    return response;
   } catch (error) {
     console.error("Failed to login:", error);
     throw new Error("Fail to upload profile image");
@@ -77,7 +75,7 @@ export async function uploadBgImg(data: IUploadImg, token: string | null) {
   form.append("username", data.username);
   data.imgData && form.append("bgImg", data.imgData);
   try {
-    const response = await fetch(`${BASE_URL}/profileImg`, {
+    const response = await fetch(`${BASE_URL}/bgImg`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

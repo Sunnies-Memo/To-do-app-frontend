@@ -67,11 +67,18 @@ export default function NavigationBar() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout, isLogin } = useAuth();
+  const { logout, isLogin, refresh } = useAuth();
+  useEffect(() => {
+    if (isLogin() == null) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     if (isLogin() == null && location.pathname !== "/join") {
       navigate("/login");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogin, navigate]);
   useEffect(() => {
     setSelector(location.pathname);
