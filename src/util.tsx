@@ -61,9 +61,7 @@ export const useAuth = () => {
 
   const login = async (loginForm: ILoginForm) => {
     const loginResponse: ILoginResponse = await doLogin(loginForm);
-    console.log("login response", loginResponse);
     if (loginResponse !== null) {
-      console.log("accessToken", loginResponse.accessToken);
       setUserState({
         username: loginResponse.member.username,
         profileImg: loginResponse.member.profileImg,

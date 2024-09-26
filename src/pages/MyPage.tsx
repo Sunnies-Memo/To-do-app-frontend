@@ -5,7 +5,6 @@ import { useAuth } from "../util";
 import {
   changePassword,
   getProfile,
-  uploadBgImg,
   uploadProfileImg,
 } from "../api/profile-api";
 import {
@@ -182,11 +181,11 @@ const ImgDropArea = styled.div<IArea>`
     }
   }
   & > div:first-child {
-    width: 40%;
+    width: 90%;
   }
-  & > div:last-child {
+  /* & > div:last-child {
     width: 50%;
-  }
+  } */
 `;
 export default function MyPage() {
   const queryClient = useQueryClient();
@@ -227,18 +226,13 @@ export default function MyPage() {
     }
   };
   useEffect(() => {
-    if (imgDropAreaRef.current) {
-      const width = imgDropAreaRef.current.offsetWidth;
-      setBoxSize(width * 0.4);
-    }
-
     const handleResize = () => {
       if (imgDropAreaRef.current) {
         const width = imgDropAreaRef.current.offsetWidth;
         setBoxSize(width * 0.4);
       }
     };
-
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -251,7 +245,11 @@ export default function MyPage() {
               <span>My Page</span>
               <img
                 src={
-                  profileData?.profileImg ? profileData.profileImg : profileImg
+                  profileData?.profileImg
+                    ? profileData.profileImg.length > 1
+                      ? profileData.profileImg
+                      : profileImg
+                    : profileImg
                 }
                 alt="Profile"
               />
@@ -375,27 +373,18 @@ export default function MyPage() {
               <span>Profile Image</span>
               <ImageDropZone
                 username={profileData.username}
-                hasTempImg
                 token={token ? token : ""}
                 uploadFn={uploadProfileImg}
-                size={{
-                  width: "100%",
-                  height: "100%",
-                }}
               />
             </div>
-            <div>
+            {/* <div>
               <span>Background Image</span>
               <ImageDropZone
                 username={profileData.username}
                 token={token ? token : ""}
                 uploadFn={uploadBgImg}
-                size={{
-                  width: "100%",
-                  height: "100%",
-                }}
               />
-            </div>
+            </div> */}
           </ImgDropArea>
         </MyPageBox>
       )}

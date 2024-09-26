@@ -14,12 +14,7 @@ export interface IUploadImg {
 }
 
 export interface DropZoneProps {
-  hasTempImg?: boolean;
   username: string;
   token: string;
   uploadFn: (data: IUploadImg, token: string) => Promise<any>;
-  size: {
-    width: string;
-    height: string;
-  };
 }

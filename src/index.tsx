@@ -1,7 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { RecoilRoot } from "recoil";
 import { defaultTheme } from "./theme";
-import { Reset } from "./GlobalStyle";
 import { ThemeProvider } from "styled-components";
 import React from "react";
 import Router from "./Router";
@@ -16,7 +15,6 @@ root.render(
     <RecoilRoot>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={defaultTheme}>
-          <Reset />
           <Router />
         </ThemeProvider>
       </QueryClientProvider>

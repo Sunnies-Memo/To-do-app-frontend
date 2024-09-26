@@ -196,16 +196,6 @@ export default function JoinPage() {
             />
             {errors.password2 && <p>{errors.password2.message}</p>}
           </div>
-          <input
-            type="hidden"
-            {...register("profileImg", {
-              required: false,
-              pattern: {
-                value: /^(https?:\/\/.*\.(?:png|jpg|jpeg))$/i,
-                message: "Please enter a valid image URL (jpg, jpeg, png)",
-              },
-            })}
-          />
           <JoinSubmitBtn>Sign In</JoinSubmitBtn>
           <Link to={"/login"}>
             <span>Go back</span>

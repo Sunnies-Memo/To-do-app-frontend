@@ -39,7 +39,10 @@ footer, header, hgroup, main, menu, nav, section {
 body {
   line-height: 1;
   font-family: 'Source Sans Pro', sans-serif;
+  background-size: cover;
+  background-position: center;
   background-color: ${props => props.theme.bgColor};
+  transition: background-image 0.5s ease; /* 배경 이미지 변경 시 애니메이션 효과 */
 }
 menu, ol, ul {
   list-style: none;
@@ -58,7 +61,7 @@ table {
 }
 a{
   text-decoration: none;
-  color:inherit;
+  color: inherit;
 }
 a:hover{
    cursor: pointer;
@@ -72,8 +75,16 @@ a:hover{
 button:hover{
   cursor: pointer;
 }
-`
+`;
 
-export const Reset = createGlobalStyle`${reset}`;
+export const Reset = createGlobalStyle<{
+  backgroundImage?: string;
+}>`
+  ${reset}
+  body {
+    background-image: ${({ backgroundImage }) =>
+      backgroundImage ? `url(${backgroundImage})` : "none"};
+  }
+`;
 
 export default reset;

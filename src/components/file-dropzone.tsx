@@ -1,21 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Spinner } from "@material-tailwind/react";
 import styled from "styled-components";
 import { DropZoneProps } from "../interface/profie-interface";
 
-interface IZoneSize {
-  size: {
-    width: string;
-    height: string;
-  };
-}
-
-const Zone = styled.div<IZoneSize>`
+const Zone = styled.div`
   border: 2px dotted ${(props) => props.theme.dropArea.fromThis};
-  height: ${(props) => props.size.height};
-  width: ${(props) => props.size.width};
+  height: 100%;
+  width: 100%;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -29,19 +21,14 @@ const Zone = styled.div<IZoneSize>`
   }
 `;
 
-export function ImageDropZone({
-  hasTempImg,
-  username,
-  token,
-  uploadFn,
-  size,
-}: DropZoneProps) {
+export function ImageDropZone({ username, token, uploadFn }: DropZoneProps) {
   const queryClient = useQueryClient();
 
   const uploadImgMutation = useMutation({
     mutationFn: (data: File) => uploadFn({ username, imgData: data }, token),
     onError: () => {
       // 에러 핸들링
+      alert("Fail to upload image.");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
@@ -62,13 +49,10 @@ export function ImageDropZone({
   const { getInputProps, getRootProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <Zone {...getRootProps()} size={size}>
+    <Zone {...getRootProps()}>
       <input {...getInputProps()} />
       {uploadImgMutation.isPending ? (
-        <Spinner
-          onPointerEnterCapture={undefined}
-          onPointerLeaveCapture={undefined}
-        />
+        <p>Uploading...</p>
       ) : isDragActive ? (
         <p>Drop your image here!</p>
       ) : (
