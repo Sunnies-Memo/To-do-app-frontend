@@ -1,14 +1,13 @@
 import { styled } from "styled-components";
-import { cardDrop, toDoState } from "../atoms";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { cardDrop } from "../atoms";
+import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
-import { useAuth } from "../util";
 import { createToDo } from "../api/todo-api";
 import DragableCard from "./dragable-card";
-import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -65,14 +64,13 @@ interface IBoardProps {
   index: number;
   toDos: ITodo[];
   board: IBoard;
+  token: string | null;
 }
 
-function Board({ index, toDos, board }: IBoardProps) {
-  const navigate = useNavigate();
+function Board({ index, toDos, board, token }: IBoardProps) {
+  const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
-  const { isLogin } = useAuth();
-  const setToDos = useSetRecoilState(toDoState);
 
   const lastIndexRef = useRef(100);
   useEffect(() => {
@@ -80,30 +78,51 @@ function Board({ index, toDos, board }: IBoardProps) {
     lastIndexRef.current = lastIndex ? lastIndex : 0;
   }, [toDos]);
 
+  const createToDoMutation = useMutation({
+    mutationFn: (newTodo: ITodo) => createToDo(newTodo, token),
+    onMutate: async (newTodo: ITodo) => {
+      await queryClient.cancelQueries({ queryKey: ["boards data", token] });
+      const prevData = queryClient.getQueryData<IBoard[]>([
+        "boards data",
+        token,
+      ]);
+      const tempId = "temporaryIdForTodo";
+      queryClient.setQueryData<IBoard[]>(["boards data", token], (prev) => {
+        if (!prev) return prevData;
+        return prevData?.map((thisboard) => {
+          if (thisboard.boardId === board.boardId) {
+            return {
+              ...thisboard,
+              toDoList: !thisboard.toDoList
+                ? undefined
+                : [...thisboard.toDoList, { ...newTodo, todoId: tempId }],
+            };
+          } else {
+            return thisboard;
+          }
+        });
+      });
+      return { prevData };
+    },
+    onError: (_err, _newTodo, context) => {
+      queryClient.setQueryData(["boards data", token], context?.prevData);
+      alert("Error");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+    },
+  });
+
   const onValid = async (todo: ITodo) => {
-    const token = isLogin();
     if (!token) return;
-    const newToDo: ITodo = {
+    const newTodo: ITodo = {
+      board: board,
       text: todo.text,
       orderIndex: lastIndexRef.current + 40,
-      board: board,
     };
-    try {
-      const createdToDo = await createToDo(newToDo, token);
-      setToDos((prev) => {
-        const newToDoObj = {
-          ...prev,
-          [board.boardId]: [...prev[board.boardId], createdToDo],
-        };
-        return newToDoObj;
-      });
-      setValue("text", "");
-    } catch {
-      navigate("/login");
-      return;
-    }
+    createToDoMutation.mutate(newTodo);
+    setValue("text", "");
   };
-
   return (
     <Draggable
       key={board.boardId}

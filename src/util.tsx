@@ -108,6 +108,12 @@ export const useUpdateToDos = () => {
       (item) => item.boardId !== "temporaryIdForBoard"
     );
 
+    Object.keys(prevTodoStates).forEach((boardId) => {
+      prevTodoStates[boardId] = prevTodoStates[boardId].filter(
+        (todo) => todo.todoId !== "temporaryIdForTodo"
+      );
+    });
+
     const newBoards: IBoardUpdate[] = newData;
     const newToDoStates: IToDoState = newData.reduce<IToDoState>((acc, cur) => {
       acc[cur.boardId] = cur.toDoList ? cur.toDoList : [];
