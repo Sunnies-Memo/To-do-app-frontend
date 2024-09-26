@@ -1,7 +1,34 @@
 import { DefaultTheme } from "styled-components";
 
-export const defaultTheme:DefaultTheme = {
-    bgColor: "#3F8CF2",
-    boardColor: "#DADFE9", 
-    cardColor: "white",
-}
+export const defaultTheme: DefaultTheme = {
+  bgColor: "#FEF9D9",
+  boardColor: "#D2E0FB",
+  cardColor: "#F7F9F2",
+  dropArea: {
+    default: "#8eaccd",
+    draggingOver: "#89c9ff",
+    fromThis: "#668dad",
+  },
+  logoutBtn: {
+    default: "#f19ed2",
+    hover: "#f0aaff",
+  },
+  btnColor: {
+    btnDefault: "#89c9ff",
+    btnHover: "#bfe9ff",
+  },
+  bigBtn: {
+    default: "#89c9ff",
+    hover: "#bfe9ff",
+  },
+  themeBlue: {
+    ligthBlue: "#62A6DE",
+  },
+  themeGray: {
+    thickGray: "#878787",
+    lightGray: "#A6A6A6",
+  },
+  themeGreen: {
+    lightTeal: "#91DDCF",
+  },
+};
