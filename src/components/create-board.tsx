@@ -8,7 +8,6 @@ import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
 
 import { createBoard } from "../api/todo-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 
 const Wrapper = styled.div`
   position: fixed;
@@ -106,7 +105,6 @@ const formVarients = {
 };
 
 function BoardForm({ token }: { token: string | null }) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userState);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -135,7 +133,7 @@ function BoardForm({ token }: { token: string | null }) {
     },
     onError: (_err, _newTodo, context) => {
       queryClient.setQueryData(["boards data", token], context?.prevData);
-      navigate("/login");
+      alert("Error");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["boards data", token] });

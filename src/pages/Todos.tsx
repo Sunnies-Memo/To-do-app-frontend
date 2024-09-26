@@ -420,6 +420,7 @@ export default function TodosPage() {
                       board={board}
                       key={board.boardId}
                       toDos={toDos[board.boardId]}
+                      token={token}
                     />
                   );
                 })}
