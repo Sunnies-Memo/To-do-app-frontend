@@ -1,5 +1,5 @@
-import { atom, atomFamily, selector } from "recoil";
-import { IBoardUpdate, ITodo, IToDoState } from "./interface/todo-interface";
+import { atom, selector } from "recoil";
+import { IBoardUpdate, IToDoState } from "./interface/todo-interface";
 import { IUserState } from "./interface/auth-interface";
 
 export const toDoState = atom<IToDoState>({
@@ -9,11 +9,6 @@ export const toDoState = atom<IToDoState>({
 
 export const boardState = atom<IBoardUpdate[]>({
   key: "boards",
-  default: [],
-});
-
-export const toDosFamily = atomFamily<ITodo[], string>({
-  key: "toDosFamily",
   default: [],
 });
 
