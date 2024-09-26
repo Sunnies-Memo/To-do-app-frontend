@@ -3,6 +3,9 @@ import styled from "styled-components";
 import { useAuth } from "../util";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { isAuthenticated, userToken } from "../atoms";
+import { doRefresh } from "../api/auth-api";
 
 const NavWrapper = styled.div`
   position: fixed;
@@ -61,25 +64,30 @@ const LogoutBtn = styled.button`
   }
 `;
 
-export interface ILocation {}
 export default function NavigationBar() {
   const [selector, setSelector] = useState("/todo");
-
   const location = useLocation();
+  const { logout } = useAuth();
+  const isAuthed = useRecoilValue(isAuthenticated);
+  const setToken = useSetRecoilState(userToken);
   const navigate = useNavigate();
-  const { logout, isLogin, refresh } = useAuth();
   useEffect(() => {
-    if (isLogin() == null) {
-      refresh();
-    }
+    const checkAuth = async () => {
+      if (!isAuthed) {
+        const newAccessToken: string | null = await doRefresh();
+        if (newAccessToken) {
+          setToken((prevToken) =>
+            prevToken === newAccessToken ? prevToken : newAccessToken
+          );
+        } else if (location.pathname !== "/join") {
+          navigate("/login");
+        }
+      }
+    };
+    checkAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  useEffect(() => {
-    if (isLogin() == null && location.pathname !== "/join") {
-      navigate("/login");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLogin, navigate]);
+  }, [isAuthed]);
+
   useEffect(() => {
     setSelector(location.pathname);
   }, [location.pathname]);

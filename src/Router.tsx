@@ -12,6 +12,7 @@ import { IUserState } from "./interface/auth-interface";
 
 export default function Router() {
   const { bgImg } = useRecoilValue<IUserState>(userState);
+
   return (
     <>
       <Reset backgroundImage={bgImg} />
