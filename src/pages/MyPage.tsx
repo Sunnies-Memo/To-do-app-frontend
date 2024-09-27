@@ -204,6 +204,8 @@ export default function MyPage() {
   const { data: profileData } = useQuery<IUserProfile>({
     queryKey: ["userProfile"],
     queryFn: async () => getProfile(token),
+    staleTime: 1000 * 60 * 15,
+    refetchOnMount: false,
   });
   const changePwdMutation = useMutation({
     mutationFn: (data: IPasswordChange) => changePassword(data, token),
