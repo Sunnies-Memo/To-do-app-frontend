@@ -3,7 +3,7 @@ import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
 import { Suspense, useEffect, useState } from "react";
-import BoardForm from "../components/create-board";
+import BoardForm from "../components/board-form";
 
 import TrashCan from "../components/TrashBin";
 import { StrictModeDroppable, useAuth, useUpdateToDos } from "../util";

@@ -84,10 +84,8 @@ export const useAuth = () => {
         ); // 조건부 업데이트
         return true;
       }
-      logout(); // 실패 시 로그아웃
       return false;
     } catch (error) {
-      logout(); // 실패 시 로그아웃
       return false;
     }
   };

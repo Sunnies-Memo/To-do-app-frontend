@@ -46,7 +46,7 @@ export const isAuthenticated = selector({
   },
 });
 
-export const userProfileSelector = selector({
-  key: "userProfileSelector",
-  get: async () => {},
-});
+// export const userProfileSelector = selector({
+//   key: "userProfileSelector",
+//   get: async () => {},
+// });

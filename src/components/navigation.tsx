@@ -3,9 +3,8 @@ import styled from "styled-components";
 import { useAuth } from "../util";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { isAuthenticated, userToken } from "../atoms";
-import { doRefresh } from "../api/auth-api";
+import { useRecoilValue } from "recoil";
+import { isAuthenticated } from "../atoms";
 
 const NavWrapper = styled.div`
   position: fixed;
@@ -67,19 +66,14 @@ const LogoutBtn = styled.button`
 export default function NavigationBar() {
   const [selector, setSelector] = useState("/todo");
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, refresh } = useAuth();
   const isAuthed = useRecoilValue(isAuthenticated);
-  const setToken = useSetRecoilState(userToken);
   const navigate = useNavigate();
   useEffect(() => {
     const checkAuth = async () => {
       if (!isAuthed) {
-        const newAccessToken: string | null = await doRefresh();
-        if (newAccessToken) {
-          setToken((prevToken) =>
-            prevToken === newAccessToken ? prevToken : newAccessToken
-          );
-        } else if (location.pathname !== "/join") {
+        const isRefreshed = await refresh();
+        if (!isRefreshed && location.pathname !== "/join") {
           navigate("/login");
         }
       }

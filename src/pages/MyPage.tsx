@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import profileImg from "../images/default_profile.jpg";
-import { ImageDropZone } from "../components/file-dropzone";
+import { ImageDropZone } from "../components/image-dropzone";
 
 const Wrapper = styled.div`
   display: flex;

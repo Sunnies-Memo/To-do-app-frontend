@@ -6,8 +6,8 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { createToDo } from "../api/todo-api";
-import DragableCard from "./dragable-card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import DraggableCard from "./draggable-card";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -155,7 +155,7 @@ function Board({ index, toDos, board, token }: IBoardProps) {
               >
                 {toDos.map((todo, index) => {
                   return (
-                    <DragableCard
+                    <DraggableCard
                       key={todo.todoId}
                       index={index}
                       toDoId={todo.todoId}

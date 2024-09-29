@@ -15,12 +15,12 @@ const Card = styled.div<ICardProps>`
     props.isDragging ? "0px 4px 5px rgba( 0, 0, 0, 0.4)" : "none"};
 `;
 
-interface IDragalbeCard {
+interface IDraggableCard {
   toDoId?: string;
   toDoText: string;
   index: number;
 }
-function DragableCard({ toDoId, toDoText, index }: IDragalbeCard) {
+function DraggableCard({ toDoId, toDoText, index }: IDraggableCard) {
   return (
     <Draggable key={toDoId} draggableId={"todoCard" + toDoId} index={index}>
       {(magic, snapshot) => (
@@ -37,4 +37,4 @@ function DragableCard({ toDoId, toDoText, index }: IDragalbeCard) {
   );
 }
 
-export default React.memo(DragableCard);
+export default React.memo(DraggableCard);
