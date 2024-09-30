@@ -17,7 +17,7 @@ import {
 } from "../api/todo-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import Board from "../components/board";
+import Board from "../components/Board";
 
 const Wrapper = styled.div`
   display: flex;
