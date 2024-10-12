@@ -42,6 +42,7 @@ interface ITrashCanProps {
   show: boolean;
 }
 function TrashCan({ show }: ITrashCanProps) {
+  console.log("trashcan");
   return (
     <>
       <StrictModeDroppable droppableId="trashBin" isDropDisabled={!show}>

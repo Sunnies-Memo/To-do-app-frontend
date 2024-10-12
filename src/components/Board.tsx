@@ -1,6 +1,4 @@
 import { styled } from "styled-components";
-import { cardDrop } from "../atoms";
-import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import React, { useEffect, useRef } from "react";
@@ -65,12 +63,13 @@ interface IBoardProps {
   toDos: ITodo[];
   board: IBoard;
   token: string | null;
+  isCardDrop: boolean;
 }
 
-function Board({ index, toDos, board, token }: IBoardProps) {
+function Board({ index, toDos, board, token, isCardDrop }: IBoardProps) {
+  console.log("board : ", board.title);
   const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
-  const isCardDrop = useRecoilValue(cardDrop);
 
   const lastIndexRef = useRef(100);
   useEffect(() => {

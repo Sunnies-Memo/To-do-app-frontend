@@ -1,26 +1,5 @@
 import { atom, selector } from "recoil";
-import { IBoardUpdate, IToDoState } from "./interface/todo-interface";
 import { IUserState } from "./interface/auth-interface";
-
-export const toDoState = atom<IToDoState>({
-  key: "toDo",
-  default: {},
-});
-
-export const boardState = atom<IBoardUpdate[]>({
-  key: "boards",
-  default: [],
-});
-
-export const cardDrop = atom({
-  key: "cardDrop",
-  default: false,
-});
-
-export const lastBoardIndex = atom<number>({
-  key: "lastBIndex",
-  default: 100,
-});
 
 //유저 관련
 export const userState = atom<IUserState>({

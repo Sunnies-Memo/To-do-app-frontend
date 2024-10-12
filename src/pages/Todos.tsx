@@ -1,12 +1,10 @@
 import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
-import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
 import { Suspense, useEffect, useState } from "react";
 import BoardForm from "../components/board-form";
-
+import _ from "lodash";
 import TrashCan from "../components/TrashBin";
-import { StrictModeDroppable, useAuth, useUpdateToDos } from "../util";
+import { StrictModeDroppable, useAuth } from "../util";
 import { IBoard, IBoardUpdate, IToDoState } from "../interface/todo-interface";
 import {
   deleteBoard,
@@ -17,7 +15,7 @@ import {
 } from "../api/todo-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import Board from "../components/board";
+import Board from "../components/Board";
 
 const Wrapper = styled.div`
   display: flex;
@@ -37,16 +35,16 @@ const Boards = styled.div`
 `;
 
 export default function TodosPage() {
+  console.log("todos page");
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   const token = isLogin();
-  const updateData = useUpdateToDos();
-  const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
-  const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
+  const [toDos, setToDos] = useState<IToDoState>({});
+  const [boards, setBoards] = useState<IBoardUpdate[]>([]);
 
-  const setLastBIndex = useSetRecoilState(lastBoardIndex);
+  const [lastBIndex, setLastBIndex] = useState(999);
 
-  const setCardDrop = useSetRecoilState(cardDrop);
+  const [isCardDrop, setCardDrop] = useState(false);
   const [boardDrop, setBoardDrop] = useState(false);
   const [showTrashCan, setShowTrashCan] = useState(false);
 
@@ -68,7 +66,59 @@ export default function TodosPage() {
     }
     if (fetchedData != null) {
       try {
-        updateData(fetchedData);
+        // updateData(fetchedData);?
+        let prevBoards: IBoardUpdate[] = [...boards];
+        let prevTodoStates: IToDoState = { ...toDos };
+
+        fetchedData.forEach((thisBoard) => {
+          const idx = prevBoards.findIndex(
+            (item) => item.boardId === thisBoard.boardId
+          );
+          if (idx !== -1) {
+            if (!_.isEqual(prevBoards[idx], thisBoard)) {
+              prevBoards[idx] = thisBoard;
+            }
+          } else {
+            prevBoards.push(thisBoard);
+          }
+        });
+
+        const newBoards: IBoardUpdate[] = fetchedData;
+        const newToDoStates: IToDoState = fetchedData.reduce<IToDoState>(
+          (acc, cur) => {
+            acc[cur.boardId] = cur.toDoList ? cur.toDoList : [];
+            return acc;
+          },
+          {}
+        );
+
+        newBoards.forEach((thisBoard) => {
+          const idx = prevBoards.findIndex(
+            (item) => item.boardId === thisBoard.boardId
+          );
+          if (idx !== -1) {
+            if (!_.isEqual(prevBoards[idx], thisBoard)) {
+              prevBoards[idx] = thisBoard;
+            }
+          } else {
+            prevBoards.push(thisBoard);
+          }
+        });
+
+        Object.entries(newToDoStates).forEach(([thisBoardId, thisTodos]) => {
+          const prevTodos = prevTodoStates[thisBoardId];
+
+          if (!prevTodos) {
+            prevTodoStates[thisBoardId] = [...thisTodos];
+          } else {
+            if (!_.isEqual(prevTodos, thisTodos)) {
+              prevTodoStates[thisBoardId] = [...thisTodos];
+            }
+          }
+        });
+
+        setBoards(prevBoards);
+        setToDos(prevTodoStates);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");
       }
@@ -402,7 +452,7 @@ export default function TodosPage() {
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Wrapper className="wrapper">
           <Suspense fallback={<div>Loading...</div>}>
-            <BoardForm token={token} />
+            <BoardForm token={token} lastBIndex={lastBIndex} />
           </Suspense>
           <StrictModeDroppable
             droppableId="boards"
@@ -423,6 +473,7 @@ export default function TodosPage() {
                       key={board.boardId}
                       toDos={toDos[board.boardId]}
                       token={token}
+                      isCardDrop={isCardDrop}
                     />
                   );
                 })}
