@@ -8,7 +8,6 @@ import {
 } from "recoil";
 import { isAuthenticated, userState, userToken } from "./atoms";
 import { useNavigate } from "react-router-dom";
-import _ from "lodash";
 import { doLogin, doLogout, doRefresh } from "./api/auth-api";
 import { ILoginForm, ILoginResponse } from "./interface/auth-interface";
 

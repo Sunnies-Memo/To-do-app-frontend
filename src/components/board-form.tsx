@@ -1,7 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useRecoilValue } from "recoil";
 import styled from "styled-components";
-import { userState } from "../atoms";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
@@ -105,15 +103,16 @@ const formVarients = {
 };
 
 function BoardForm({
+  username,
   token,
   lastBIndex,
 }: {
+  username: string | undefined;
   token: string | null;
   lastBIndex: number;
 }) {
-  console.log("board form");
+  console.log("board form : ", username);
   const queryClient = useQueryClient();
-  const userData = useRecoilValue(userState);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [showForm, setShowForm] = useState(false);
@@ -135,6 +134,13 @@ function BoardForm({
       });
 
       return { prevData };
+    },
+    onError: (_err, _newTodo, context) => {
+      queryClient.setQueryData(["boards data", token], context?.prevData);
+      alert("Error");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards data", token] });
     },
   });
 
@@ -159,7 +165,7 @@ function BoardForm({
     const newBoard = {
       title: title,
       orderIndex: lastBIndex + 40,
-      username: userData.username,
+      username: username ? username : "",
     };
     createBoardMutation.mutate(newBoard);
     setValue("title", "");

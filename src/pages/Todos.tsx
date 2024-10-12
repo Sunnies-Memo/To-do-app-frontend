@@ -16,6 +16,8 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import Board from "../components/Board";
+import { IUserProfile } from "../interface/profie-interface";
+import { getProfile } from "../api/profile-api";
 
 const Wrapper = styled.div`
   display: flex;
@@ -35,7 +37,7 @@ const Boards = styled.div`
 `;
 
 export default function TodosPage() {
-  console.log("todos page");
+  console.log("todos page ");
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   const token = isLogin();
@@ -55,6 +57,11 @@ export default function TodosPage() {
     staleTime: 1000 * 60 * 15,
     refetchOnMount: false,
   });
+  const { data: userData } = useQuery<IUserProfile>({
+    queryKey: ["userProfile"],
+    queryFn: async () => getProfile(token),
+    refetchOnMount: false,
+  });
 
   if (isError) {
     navigate("/login");
@@ -69,6 +76,16 @@ export default function TodosPage() {
         // updateData(fetchedData);?
         let prevBoards: IBoardUpdate[] = [...boards];
         let prevTodoStates: IToDoState = { ...toDos };
+
+        prevBoards = prevBoards.filter(
+          (item) => item.boardId !== "temporaryIdForBoard"
+        );
+
+        Object.keys(prevTodoStates).forEach((boardId) => {
+          prevTodoStates[boardId] = prevTodoStates[boardId].filter(
+            (todo) => todo.todoId !== "temporaryIdForTodo"
+          );
+        });
 
         fetchedData.forEach((thisBoard) => {
           const idx = prevBoards.findIndex(
@@ -452,7 +469,11 @@ export default function TodosPage() {
       <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <Wrapper className="wrapper">
           <Suspense fallback={<div>Loading...</div>}>
-            <BoardForm token={token} lastBIndex={lastBIndex} />
+            <BoardForm
+              username={userData?.username}
+              token={token}
+              lastBIndex={lastBIndex}
+            />
           </Suspense>
           <StrictModeDroppable
             droppableId="boards"
