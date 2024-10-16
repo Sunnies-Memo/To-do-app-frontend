@@ -83,3 +83,5 @@ export async function doRefresh() {
     return null;
   }
 }
+
+export async function checkId(id: string) {}
