@@ -56,9 +56,12 @@ export async function doRegister(registerForm: IRegisterForm) {
     });
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      if (response.status === 406) {
+        return false;
+      }
       throw new Error(errorMessage);
     }
-    return response;
+    return true;
   } catch (error) {
     console.error("Failed to register:", error);
     throw error;

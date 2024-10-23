@@ -19,6 +19,7 @@ export async function getBoards(token: string | null, retry = true) {
     }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+      console.log("log", response);
       throw new Error(errorMessage);
     }
     return await response.json();
