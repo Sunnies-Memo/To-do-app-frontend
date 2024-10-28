@@ -56,6 +56,7 @@ export default function TodosPage() {
     queryFn: async () => getBoards(token),
     staleTime: 1000 * 60 * 15,
     refetchOnMount: false,
+    enabled: token !== null,
   });
 
   if (isError) {
@@ -63,6 +64,7 @@ export default function TodosPage() {
   }
 
   useEffect(() => {
+    console.log("데이터 가져오기");
     if (!isLogin()) {
       navigate("/login");
     }
