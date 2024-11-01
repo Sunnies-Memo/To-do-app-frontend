@@ -30,11 +30,13 @@ const MyPageBox = styled(motion.div)`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   width: 40%;
   min-width: 440px;
   height: auto;
   min-height: 400px;
   border-radius: 5px;
+  padding-bottom: 10px;
   background-color: ${(props) => props.theme.boardColor};
 `;
 const Title = styled.div`
@@ -163,11 +165,11 @@ interface IArea {
 }
 const ImgDropArea = styled.div<IArea>`
   width: 100%;
-  height: ${(props) => props.size + 20}px;
+  height: 24vh;
   display: flex;
   justify-content: space-around;
   & > div {
-    height: ${(props) => props.size + 15}px;
+    height: 24vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -183,9 +185,6 @@ const ImgDropArea = styled.div<IArea>`
   & > div:first-child {
     width: 90%;
   }
-  /* & > div:last-child {
-    width: 50%;
-  } */
 `;
 export default function MyPage() {
   const queryClient = useQueryClient();
@@ -234,10 +233,11 @@ export default function MyPage() {
         setBoxSize(width * 0.4);
       }
     };
+    console.log("handleResize()");
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [imgDropAreaRef.current?.offsetWidth]);
   return (
     <Wrapper>
       {profileData?.username && (
@@ -379,14 +379,6 @@ export default function MyPage() {
                 uploadFn={uploadProfileImg}
               />
             </div>
-            {/* <div>
-              <span>Background Image</span>
-              <ImageDropZone
-                username={profileData.username}
-                token={token ? token : ""}
-                uploadFn={uploadBgImg}
-              />
-            </div> */}
           </ImgDropArea>
         </MyPageBox>
       )}

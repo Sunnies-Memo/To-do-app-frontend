@@ -64,7 +64,6 @@ export default function TodosPage() {
   }
 
   useEffect(() => {
-    console.log("데이터 가져오기");
     if (!isLogin()) {
       navigate("/login");
     }
