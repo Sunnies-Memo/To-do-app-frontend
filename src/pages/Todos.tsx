@@ -41,8 +41,6 @@ export default function TodosPage() {
   const { isLogin } = useAuth();
   const token = isLogin();
   const updateData = useUpdateToDos();
-  const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
-  const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
 
   const setLastBIndex = useSetRecoilState(lastBoardIndex);
 
@@ -78,12 +76,12 @@ export default function TodosPage() {
   }, [fetchedData, isLogin]);
 
   useEffect(() => {
-    if (boards.length > 0) {
+    if (fetchedData !== undefined && fetchedData.length > 0) {
       setLastBIndex((prev) => {
-        return boards[boards.length - 1].orderIndex;
+        return fetchedData[fetchedData.length - 1].orderIndex;
       });
     }
-  }, [boards, setLastBIndex]);
+  }, [fetchedData, setLastBIndex]);
 
   const onDragStart = (info: DragStart) => {
     setShowTrashCan(true);
@@ -416,13 +414,13 @@ export default function TodosPage() {
                 ref={magic.innerRef}
                 {...magic.droppableProps}
               >
-                {boards.map((board, index) => {
+                {fetchedData?.map((board, index) => {
                   return (
                     <Board
+                      boardId={board.boardId}
+                      title={board.title}
                       index={index}
-                      board={board}
                       key={board.boardId}
-                      toDos={toDos[board.boardId]}
                       token={token}
                     />
                   );

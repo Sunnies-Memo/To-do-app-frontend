@@ -8,14 +8,13 @@ import {
   useSetRecoilState,
 } from "recoil";
 import {
-  boardState,
+  boardAtomFamily,
   isAuthenticated,
-  toDoState,
   userState,
   userToken,
 } from "./atoms";
 import { useNavigate } from "react-router-dom";
-import { IBoard, IBoardUpdate, IToDoState } from "./interface/todo-interface";
+import { IBoard } from "./interface/todo-interface";
 import _ from "lodash";
 import { doLogin, doLogout, doRefresh } from "./api/auth-api";
 import { ILoginForm, ILoginResponse } from "./interface/auth-interface";
@@ -94,55 +93,71 @@ export const useAuth = () => {
 };
 
 export const useUpdateToDos = () => {
-  return useRecoilCallback(({ snapshot, set }) => async (newData: IBoard[]) => {
-    let prevBoards: IBoardUpdate[] = [
-      ...(await snapshot.getPromise(boardState)),
-    ];
-    let prevTodoStates: IToDoState = {
-      ...(await snapshot.getPromise(toDoState)),
-    };
-
-    prevBoards = prevBoards.filter(
-      (item) => item.boardId !== "temporaryIdForBoard"
-    );
-
-    Object.keys(prevTodoStates).forEach((boardId) => {
-      prevTodoStates[boardId] = prevTodoStates[boardId].filter(
-        (todo) => todo.todoId !== "temporaryIdForTodo"
-      );
-    });
-
-    const newBoards: IBoardUpdate[] = newData;
-    const newToDoStates: IToDoState = newData.reduce<IToDoState>((acc, cur) => {
-      acc[cur.boardId] = cur.toDoList ? cur.toDoList : [];
-      return acc;
-    }, {});
-
-    newBoards.forEach((thisBoard) => {
-      const idx = prevBoards.findIndex(
-        (item) => item.boardId === thisBoard.boardId
-      );
-      if (idx !== -1) {
-        if (!_.isEqual(prevBoards[idx], thisBoard)) {
-          prevBoards[idx] = thisBoard;
-        }
-      } else {
-        prevBoards.push(thisBoard);
+  return useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (newBoards: IBoard[]) => {
+        newBoards.forEach(async (newBoard) => {
+          const oldBoard = await snapshot.getPromise(
+            boardAtomFamily(newBoard.boardId)
+          );
+          if (!_.isEqual(newBoard, oldBoard)) {
+            set(boardAtomFamily(newBoard.boardId), newBoard);
+          }
+        });
       }
-    });
+  );
 
-    Object.entries(newToDoStates).forEach(([thisBoardId, thisTodos]) => {
-      const prevTodos = prevTodoStates[thisBoardId];
+  // return useRecoilCallback(({ snapshot, set }) => async (newData: IBoard[]) => {
+  //   console.log("data", newData);
 
-      if (!prevTodos) {
-        prevTodoStates[thisBoardId] = [...thisTodos];
-      } else {
-        if (!_.isEqual(prevTodos, thisTodos)) {
-          prevTodoStates[thisBoardId] = [...thisTodos];
-        }
-      }
-    });
-    set(boardState, prevBoards);
-    set(toDoState, prevTodoStates);
-  });
+  //   let prevBoards: IBoardUpdate[] = [
+  //     ...(await snapshot.getPromise(boardState)),
+  //   ];
+  //   let prevTodoStates: IToDoState = {
+  //     ...(await snapshot.getPromise(toDoState)),
+  //   };
+
+  //   prevBoards = prevBoards.filter(
+  //     (item) => item.boardId !== "temporaryIdForBoard"
+  //   );
+
+  //   Object.keys(prevTodoStates).forEach((boardId) => {
+  //     prevTodoStates[boardId] = prevTodoStates[boardId].filter(
+  //       (todo) => todo.todoId !== "temporaryIdForTodo"
+  //     );
+  //   });
+
+  //   const newBoards: IBoardUpdate[] = newData;
+  //   const newToDoStates: IToDoState = newData.reduce<IToDoState>((acc, cur) => {
+  //     acc[cur.boardId] = cur.toDoList ? cur.toDoList : [];
+  //     return acc;
+  //   }, {});
+
+  //   newBoards.forEach((thisBoard) => {
+  //     const idx = prevBoards.findIndex(
+  //       (item) => item.boardId === thisBoard.boardId
+  //     );
+  //     if (idx !== -1) {
+  //       if (!_.isEqual(prevBoards[idx], thisBoard)) {
+  //         prevBoards[idx] = thisBoard;
+  //       }
+  //     } else {
+  //       prevBoards.push(thisBoard);
+  //     }
+  //   });
+
+  //   Object.entries(newToDoStates).forEach(([thisBoardId, thisTodos]) => {
+  //     const prevTodos = prevTodoStates[thisBoardId];
+
+  //     if (!prevTodos) {
+  //       prevTodoStates[thisBoardId] = [...thisTodos];
+  //     } else {
+  //       if (!_.isEqual(prevTodos, thisTodos)) {
+  //         prevTodoStates[thisBoardId] = [...thisTodos];
+  //       }
+  //     }
+  //   });
+  //   set(boardState, prevBoards);
+  //   set(toDoState, prevTodoStates);
+  // });
 };

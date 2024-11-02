@@ -1,6 +1,66 @@
-import { atom, selector } from "recoil";
-import { IBoardUpdate, IToDoState } from "./interface/todo-interface";
+import {
+  atom,
+  atomFamily,
+  DefaultValue,
+  selector,
+  selectorFamily,
+} from "recoil";
+import {
+  IBoard,
+  IBoardUpdate,
+  ITodo,
+  IToDoState,
+} from "./interface/todo-interface";
 import { IUserState } from "./interface/auth-interface";
+
+export const boardAtomFamily = atomFamily<IBoard, string>({
+  key: "boardAtomFamily",
+  default: (boardId: string) => ({
+    boardId,
+    title: "",
+    orderIndex: 0,
+    username: "",
+    toDoList: [],
+  }),
+});
+
+export const toDoListSelector = selectorFamily<ITodo[] | undefined, string>({
+  key: "toDoList",
+  get:
+    (boardId: string) =>
+    ({ get }) => {
+      const board = get(boardAtomFamily(boardId));
+      return board.toDoList;
+    },
+  set:
+    (boardId: string) =>
+    ({ set, reset }, tempToDoList: ITodo[] | DefaultValue | undefined) => {
+      if (tempToDoList instanceof DefaultValue) {
+        reset(boardAtomFamily(boardId));
+      } else if (tempToDoList !== undefined) {
+        set(boardAtomFamily(boardId), (prevBoard) => ({
+          ...prevBoard,
+          toDoList: [...tempToDoList],
+        }));
+      }
+    },
+});
+
+export const lastToDoIndexSelector = selectorFamily<number, string>({
+  key: "lastToDoIndex",
+  get:
+    (boardId: string) =>
+    ({ get }) => {
+      const toDoList = get(toDoListSelector(boardId));
+      if (toDoList !== undefined) {
+        let lastIndex = toDoList[toDoList.length - 1].orderIndex;
+        lastIndex = lastIndex ? lastIndex : 0;
+        return lastIndex;
+      } else {
+        return 0;
+      }
+    },
+});
 
 export const toDoState = atom<IToDoState>({
   key: "toDo",
