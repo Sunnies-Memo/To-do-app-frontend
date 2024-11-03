@@ -124,7 +124,9 @@ export const useToDos = () => {
             );
             if (!_.isEqual(newBoard, oldBoard)) {
               set(boardAtomFamily(newBoard.boardId), newBoard);
+              console.log("board updated", newBoard.title);
             }
+            console.log("in updateCards", newBoard);
             return {
               boardId: newBoard.boardId,
               title: newBoard.title,
@@ -343,8 +345,9 @@ export const useToDos = () => {
           }
 
           let gap: number = nextIndex ? nextIndex - currIndex : 999;
-          let thisCard = {
+          let thisCard: ITodo = {
             ...sourceCards[sourceIdx],
+            board: { boardId: destinationId },
             orderIndex: currIndex,
           };
           set(boardAtomFamily(sourceId), (prev) => {

@@ -4,7 +4,8 @@ import { useAuth } from "../util";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRecoilValue } from "recoil";
-import { isAuthenticated } from "../atoms";
+import { isAuthenticated, userToken } from "../atoms";
+import { useQueryClient } from "@tanstack/react-query";
 
 const NavWrapper = styled.div`
   position: fixed;
@@ -69,6 +70,11 @@ export default function NavigationBar() {
   const { logout, refresh } = useAuth();
   const isAuthed = useRecoilValue(isAuthenticated);
   const navigate = useNavigate();
+  const token = useRecoilValue(userToken);
+  const queryClient = useQueryClient();
+  const handleClick = () => {
+    queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+  };
   useEffect(() => {
     const checkAuth = async () => {
       if (!isAuthed) {
@@ -102,7 +108,7 @@ export default function NavigationBar() {
                     )}
                   </li>
                 </Link>
-                <Link to="/mypage">
+                <Link to="/mypage" onClick={handleClick}>
                   <li>
                     My Page
                     {selector === "/mypage" && (

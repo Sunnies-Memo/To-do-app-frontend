@@ -66,7 +66,7 @@ export default function TodosPage() {
     if (isError) {
       navigate("/login");
     }
-  }, [isError]);
+  }, [isError, navigate]);
 
   useEffect(() => {
     if (!isLogin()) {
