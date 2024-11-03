@@ -10,19 +10,26 @@ import {
 import {
   boardAtomFamily,
   cardListSelector,
-  IBoardOrder,
   isAuthenticated,
   orderedBoardList,
+  userNameSelector,
   userState,
   userToken,
 } from "./atoms";
 import { useNavigate } from "react-router-dom";
-import { IBoard, ITodo } from "./interface/todo-interface";
+import {
+  IBoard,
+  IBoardOrder,
+  IBoardUpdate,
+  ITodo,
+} from "./interface/todo-interface";
 import _ from "lodash";
 import { doLogin, doLogout, doRefresh } from "./api/auth-api";
 import { ILoginForm, ILoginResponse } from "./interface/auth-interface";
 import { deleteBoard, deleteToDo, moveBoard, moveToDo } from "./api/todo-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { IUserProfile } from "./interface/profie-interface";
+import { getProfile } from "./api/profile-api";
 
 export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   const [enabled, setEnabled] = useState(false);
@@ -47,6 +54,7 @@ export const useAuth = () => {
   const isAuthed = useRecoilValue(isAuthenticated);
   const [token, setToken] = useRecoilState(userToken);
   const setUserState = useSetRecoilState(userState);
+  const userName = useRecoilValue(userNameSelector);
   const resetUserState = useResetRecoilState(userState);
   const navigate = useNavigate();
 
@@ -86,6 +94,11 @@ export const useAuth = () => {
         setToken((prevToken) =>
           prevToken === newAccessToken ? prevToken : newAccessToken
         ); // 조건부 업데이트
+        if (userName.length === 0) {
+          const profile: IUserProfile = await getProfile(newAccessToken);
+          setUserState(profile);
+        }
+
         return true;
       }
       return false;
@@ -100,10 +113,11 @@ export const useAuth = () => {
 export const useToDos = () => {
   const queryClient = useQueryClient();
 
+  //백엔드에서 받은 board 데이터를 가공하여 atom에 저장
   const updateCards = useRecoilCallback(
     ({ snapshot, set }) =>
       async (newBoards: IBoard[]) => {
-        await Promise.all(
+        const updatedOrderedBoard: IBoardOrder[] = await Promise.all(
           newBoards.map(async (newBoard) => {
             const oldBoard = await snapshot.getPromise(
               boardAtomFamily(newBoard.boardId)
@@ -111,13 +125,24 @@ export const useToDos = () => {
             if (!_.isEqual(newBoard, oldBoard)) {
               set(boardAtomFamily(newBoard.boardId), newBoard);
             }
+            return {
+              boardId: newBoard.boardId,
+              title: newBoard.title,
+              orderIndex: newBoard.orderIndex,
+            };
           })
         );
+        set(orderedBoardList, updatedOrderedBoard);
       }
   );
   const transportBoard = useRecoilCallback(
     ({ snapshot, set }) =>
-      async (sourceIdx: number, destinationIdx: number, token: string) => {
+      async (
+        sourceIdx: number,
+        destinationIdx: number,
+        username: string,
+        token: string
+      ) => {
         let prevIndex: number | null;
         let nextIndex: number | null;
         const orderedBoards = await snapshot.getPromise(orderedBoardList);
@@ -166,9 +191,10 @@ export const useToDos = () => {
           return;
         }
         let gap: number = nextIndex ? nextIndex - currIndex : 999;
-        let thisBoard: IBoardOrder = {
+        let thisBoard: IBoardUpdate = {
           ...orderedBoards[sourceIdx],
           orderIndex: currIndex,
+          username: username,
         };
 
         set(orderedBoardList, (prev) => {
@@ -348,6 +374,7 @@ export const useToDos = () => {
           prev.filter((orderedBoard) => orderedBoard.boardId !== boardId)
         );
         await deleteBoard(thisBoard, token);
+        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
       }
   );
   const removeCard = useRecoilCallback(
@@ -355,10 +382,11 @@ export const useToDos = () => {
       async (boardId: string, cardIdx: number, token: string) => {
         const thisCards = await snapshot.getPromise(cardListSelector(boardId));
         if (thisCards === undefined) return;
-        set(boardAtomFamily(boardId), (prev) => ({
-          ...prev,
-          toDoList: prev.toDoList ? [...prev.toDoList.splice(cardIdx, 1)] : [],
-        }));
+        set(boardAtomFamily(boardId), (prev) => {
+          const updatedCards = prev.toDoList ? [...prev.toDoList] : [];
+          updatedCards.splice(cardIdx, 1);
+          return { ...prev, toDoList: updatedCards };
+        });
         await deleteToDo(thisCards[cardIdx], token);
       }
   );

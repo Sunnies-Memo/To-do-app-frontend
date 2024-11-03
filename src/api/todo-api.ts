@@ -1,10 +1,4 @@
-import { IBoardOrder } from "../atoms";
-import {
-  IBoard,
-  IBoardCreate,
-  IBoardUpdate,
-  ITodo,
-} from "../interface/todo-interface";
+import { IBoardCreate, IBoardUpdate, ITodo } from "../interface/todo-interface";
 import { doRefresh } from "./auth-api";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
@@ -34,7 +28,7 @@ export async function getBoards(
 }
 
 export async function moveBoard(
-  board: IBoardOrder,
+  board: IBoardUpdate,
   gap: number,
   token: string,
   retry = true
@@ -69,6 +63,7 @@ export async function createBoard(
   token: string | null,
   retry = true
 ): Promise<any> {
+  console.log("creating board..", board);
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {

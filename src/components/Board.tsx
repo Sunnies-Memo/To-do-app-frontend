@@ -1,5 +1,5 @@
 import { styled } from "styled-components";
-import { cardDrop, lastToDoIndexSelector, toDoListSelector } from "../atoms";
+import { cardDrop, cardListSelector, lastToDoIndexSelector } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
@@ -68,10 +68,12 @@ interface IBoardProps {
 }
 
 function Board({ index, boardId, title, token }: IBoardProps) {
+  console.log("====boardId : ", boardId);
+  console.log("board droppable Id", index + "");
   const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
-  const toDoList = useRecoilValue(toDoListSelector(boardId));
+  const toDoList = useRecoilValue(cardListSelector(boardId));
   const lastIndex = useRecoilValue(lastToDoIndexSelector(boardId));
 
   const lastIndexRef = useRef(100);
@@ -82,6 +84,7 @@ function Board({ index, boardId, title, token }: IBoardProps) {
   const createToDoMutation = useMutation({
     mutationFn: (newTodo: ITodo) => createToDo(newTodo, token),
     onMutate: async (newTodo: ITodo) => {
+      console.log("on mutate todo", newTodo);
       await queryClient.cancelQueries({ queryKey: ["boards data", token] });
       const prevData = queryClient.getQueryData<IBoard[]>([
         "boards data",
@@ -107,7 +110,7 @@ function Board({ index, boardId, title, token }: IBoardProps) {
     },
     onError: (_err, _newTodo, context) => {
       queryClient.setQueryData(["boards data", token], context?.prevData);
-      alert("Error");
+      console.log("cannot create card", _err);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["boards data", token] });
@@ -118,6 +121,7 @@ function Board({ index, boardId, title, token }: IBoardProps) {
     if (!token) return;
     const newTodo: ITodo = {
       text: todo.text,
+      board: { boardId },
       orderIndex: lastIndexRef.current + 40,
     };
     createToDoMutation.mutate(newTodo);
