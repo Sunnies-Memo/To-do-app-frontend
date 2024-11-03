@@ -9,15 +9,20 @@ import {
 } from "recoil";
 import {
   boardAtomFamily,
+  cardListSelector,
+  IBoardOrder,
   isAuthenticated,
+  orderedBoardList,
   userState,
   userToken,
 } from "./atoms";
 import { useNavigate } from "react-router-dom";
-import { IBoard } from "./interface/todo-interface";
+import { IBoard, ITodo } from "./interface/todo-interface";
 import _ from "lodash";
 import { doLogin, doLogout, doRefresh } from "./api/auth-api";
 import { ILoginForm, ILoginResponse } from "./interface/auth-interface";
+import { deleteBoard, deleteToDo, moveBoard, moveToDo } from "./api/todo-api";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
   const [enabled, setEnabled] = useState(false);
@@ -92,72 +97,277 @@ export const useAuth = () => {
   return { isLogin, login, logout, refresh };
 };
 
-export const useUpdateToDos = () => {
-  return useRecoilCallback(
+export const useToDos = () => {
+  const queryClient = useQueryClient();
+
+  const updateCards = useRecoilCallback(
     ({ snapshot, set }) =>
       async (newBoards: IBoard[]) => {
-        newBoards.forEach(async (newBoard) => {
-          const oldBoard = await snapshot.getPromise(
-            boardAtomFamily(newBoard.boardId)
-          );
-          if (!_.isEqual(newBoard, oldBoard)) {
-            set(boardAtomFamily(newBoard.boardId), newBoard);
-          }
+        await Promise.all(
+          newBoards.map(async (newBoard) => {
+            const oldBoard = await snapshot.getPromise(
+              boardAtomFamily(newBoard.boardId)
+            );
+            if (!_.isEqual(newBoard, oldBoard)) {
+              set(boardAtomFamily(newBoard.boardId), newBoard);
+            }
+          })
+        );
+      }
+  );
+  const transportBoard = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (sourceIdx: number, destinationIdx: number, token: string) => {
+        let prevIndex: number | null;
+        let nextIndex: number | null;
+        const orderedBoards = await snapshot.getPromise(orderedBoardList);
+
+        //아무것도 없는 위치
+        if (
+          orderedBoards[destinationIdx - 1] == null &&
+          orderedBoards[destinationIdx + 1] == null
+        ) {
+          prevIndex = 0;
+          nextIndex = 0;
+        }
+
+        //맨 앞 이동
+        else if (orderedBoards[destinationIdx - 1] == null) {
+          prevIndex = null;
+          nextIndex = orderedBoards[destinationIdx].orderIndex;
+        }
+
+        //맨 뒤로 이동
+        else if (orderedBoards[destinationIdx + 1] == null) {
+          prevIndex = orderedBoards[destinationIdx].orderIndex;
+          nextIndex = null;
+        }
+
+        //맨 앞에서 뒤로 이동
+        else if (orderedBoards[sourceIdx - 1] == null) {
+          prevIndex = orderedBoards[destinationIdx].orderIndex;
+          nextIndex = orderedBoards[destinationIdx + 1].orderIndex;
+        }
+
+        //그 외
+        else {
+          prevIndex = orderedBoards[destinationIdx - 1].orderIndex;
+          nextIndex = orderedBoards[destinationIdx].orderIndex;
+        }
+
+        let currIndex: number;
+        if (prevIndex != null && nextIndex != null) {
+          currIndex = Math.floor((prevIndex + nextIndex) / 2);
+        } else if (prevIndex == null && nextIndex) {
+          currIndex = Math.floor(nextIndex / 2);
+        } else if (nextIndex == null && prevIndex) {
+          currIndex = prevIndex + 10;
+        } else {
+          return;
+        }
+        let gap: number = nextIndex ? nextIndex - currIndex : 999;
+        let thisBoard: IBoardOrder = {
+          ...orderedBoards[sourceIdx],
+          orderIndex: currIndex,
+        };
+
+        set(orderedBoardList, (prev) => {
+          const boardsCopy = [...prev];
+          boardsCopy.splice(sourceIdx, 1);
+          boardsCopy.splice(destinationIdx, 0, thisBoard);
+          return boardsCopy;
         });
+
+        await moveBoard(thisBoard, gap, token);
+        if (gap <= 3) {
+          queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+        }
       }
   );
 
-  // return useRecoilCallback(({ snapshot, set }) => async (newData: IBoard[]) => {
-  //   console.log("data", newData);
+  const transportCard = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (
+        sourceId: string,
+        sourceIdx: number,
+        destinationId: string,
+        destinationIdx: number,
+        token: string
+      ) => {
+        //수정 전
+        const sourceCards = await snapshot.getPromise(
+          cardListSelector(sourceId)
+        );
+        const destinationCards = await snapshot.getPromise(
+          cardListSelector(destinationId)
+        );
 
-  //   let prevBoards: IBoardUpdate[] = [
-  //     ...(await snapshot.getPromise(boardState)),
-  //   ];
-  //   let prevTodoStates: IToDoState = {
-  //     ...(await snapshot.getPromise(toDoState)),
-  //   };
+        //카드 이동 로직
+        if (sourceCards === undefined || destinationCards === undefined) return;
+        let prevIndex: number | undefined;
+        let nextIndex: number | undefined;
 
-  //   prevBoards = prevBoards.filter(
-  //     (item) => item.boardId !== "temporaryIdForBoard"
-  //   );
+        //source와 destionation이 같은 경우
+        if (sourceId === destinationId) {
+          //아무것도 없는 board로 이동
+          if (
+            destinationCards[destinationIdx - 1] === undefined &&
+            destinationCards[destinationIdx + 1] === undefined
+          ) {
+            prevIndex = undefined;
+            nextIndex = undefined;
+          }
 
-  //   Object.keys(prevTodoStates).forEach((boardId) => {
-  //     prevTodoStates[boardId] = prevTodoStates[boardId].filter(
-  //       (todo) => todo.todoId !== "temporaryIdForTodo"
-  //     );
-  //   });
+          //맨 앞으로 이동
+          else if (destinationCards[destinationIdx - 1] === undefined) {
+            prevIndex = undefined;
+            nextIndex = destinationCards[destinationIdx].orderIndex;
+          }
 
-  //   const newBoards: IBoardUpdate[] = newData;
-  //   const newToDoStates: IToDoState = newData.reduce<IToDoState>((acc, cur) => {
-  //     acc[cur.boardId] = cur.toDoList ? cur.toDoList : [];
-  //     return acc;
-  //   }, {});
+          //맨 뒤로 이동
+          else if (destinationCards[destinationIdx + 1] === undefined) {
+            prevIndex = destinationCards[destinationIdx].orderIndex;
+            nextIndex = undefined;
+          }
 
-  //   newBoards.forEach((thisBoard) => {
-  //     const idx = prevBoards.findIndex(
-  //       (item) => item.boardId === thisBoard.boardId
-  //     );
-  //     if (idx !== -1) {
-  //       if (!_.isEqual(prevBoards[idx], thisBoard)) {
-  //         prevBoards[idx] = thisBoard;
-  //       }
-  //     } else {
-  //       prevBoards.push(thisBoard);
-  //     }
-  //   });
+          //그 외
+          else if (destinationCards[sourceIdx - 1] === undefined) {
+            prevIndex = destinationCards[destinationIdx].orderIndex;
+            nextIndex = destinationCards[destinationIdx].orderIndex;
+          } else {
+            prevIndex = destinationCards[destinationIdx - 1].orderIndex;
+            nextIndex = destinationCards[destinationIdx].orderIndex;
+          }
 
-  //   Object.entries(newToDoStates).forEach(([thisBoardId, thisTodos]) => {
-  //     const prevTodos = prevTodoStates[thisBoardId];
+          let currIndex: number;
+          if (prevIndex != null && nextIndex != null) {
+            currIndex = Math.floor((prevIndex + nextIndex) / 2);
+          } else if (prevIndex == null && nextIndex == null) {
+            currIndex = 10;
+          } else if (prevIndex == null && nextIndex) {
+            currIndex = Math.floor(nextIndex / 2);
+          } else if (nextIndex == null && prevIndex) {
+            currIndex = prevIndex + 10;
+          } else {
+            return;
+          }
 
-  //     if (!prevTodos) {
-  //       prevTodoStates[thisBoardId] = [...thisTodos];
-  //     } else {
-  //       if (!_.isEqual(prevTodos, thisTodos)) {
-  //         prevTodoStates[thisBoardId] = [...thisTodos];
-  //       }
-  //     }
-  //   });
-  //   set(boardState, prevBoards);
-  //   set(toDoState, prevTodoStates);
-  // });
+          let gap: number = nextIndex ? nextIndex - currIndex : 999;
+          let thisCard = {
+            ...sourceCards[sourceIdx],
+            orderIndex: currIndex,
+          };
+          set(boardAtomFamily(destinationId), (prev) => {
+            const cardListCopy = prev.toDoList ? [...prev.toDoList] : [];
+            const taskObj: ITodo = {
+              ...cardListCopy[sourceIdx],
+              orderIndex: currIndex,
+            };
+            cardListCopy.splice(sourceIdx, 1);
+            cardListCopy.splice(destinationIdx, 0, taskObj);
+            const newCardObj: IBoard = { ...prev, toDoList: cardListCopy };
+            return newCardObj;
+          });
+          await moveToDo(thisCard, gap, token);
+          if (gap <= 3) {
+            queryClient.invalidateQueries({ queryKey: ["board data", token] });
+          }
+        }
+
+        //source와 destionation이 다른 경우
+        if (sourceId !== destinationId) {
+          //아무것도 없는 board로 이동
+          if (
+            destinationCards[destinationIdx - 1] === undefined &&
+            destinationCards[destinationIdx] === undefined
+          ) {
+            prevIndex = undefined;
+            nextIndex = undefined;
+          }
+
+          //맨 앞으로 이동
+          else if (destinationCards[destinationIdx - 1] === undefined) {
+            prevIndex = undefined;
+            nextIndex = destinationCards[destinationIdx].orderIndex;
+          }
+
+          //맨 뒤로 이동
+          else if (destinationCards[destinationIdx] === undefined) {
+            prevIndex = destinationCards[destinationIdx - 1].orderIndex;
+            nextIndex = undefined;
+          }
+
+          //그 외
+          else {
+            prevIndex = destinationCards[destinationIdx - 1].orderIndex;
+            nextIndex = destinationCards[destinationIdx].orderIndex;
+          }
+
+          let currIndex: number;
+          if (prevIndex != null && nextIndex != null) {
+            currIndex = Math.floor((prevIndex + nextIndex) / 2);
+          } else if (prevIndex == null && nextIndex == null) {
+            currIndex = 10;
+          } else if (prevIndex == null && nextIndex) {
+            currIndex = Math.floor(nextIndex / 2);
+          } else if (nextIndex == null && prevIndex) {
+            currIndex = prevIndex + 10;
+          } else {
+            return;
+          }
+
+          let gap: number = nextIndex ? nextIndex - currIndex : 999;
+          let thisCard = {
+            ...sourceCards[sourceIdx],
+            orderIndex: currIndex,
+          };
+          set(boardAtomFamily(sourceId), (prev) => {
+            const cardListCopy = prev.toDoList ? [...prev.toDoList] : [];
+            cardListCopy.splice(sourceIdx, 1);
+            return { ...prev, toDoList: cardListCopy };
+          });
+          set(boardAtomFamily(destinationId), (prev) => {
+            const cardListCopy = prev.toDoList ? [...prev.toDoList] : [];
+            cardListCopy.splice(destinationIdx, 0, thisCard);
+            return { ...prev, toDoList: cardListCopy };
+          });
+
+          await moveToDo(thisCard, gap, token);
+          if (gap <= 3) {
+            queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+          }
+        }
+      }
+  );
+
+  const removeBoard = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (boardId: string, token: string) => {
+        const thisBoard = await snapshot.getPromise(boardAtomFamily(boardId));
+        set(orderedBoardList, (prev) =>
+          prev.filter((orderedBoard) => orderedBoard.boardId !== boardId)
+        );
+        await deleteBoard(thisBoard, token);
+      }
+  );
+  const removeCard = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (boardId: string, cardIdx: number, token: string) => {
+        const thisCards = await snapshot.getPromise(cardListSelector(boardId));
+        if (thisCards === undefined) return;
+        set(boardAtomFamily(boardId), (prev) => ({
+          ...prev,
+          toDoList: prev.toDoList ? [...prev.toDoList.splice(cardIdx, 1)] : [],
+        }));
+        await deleteToDo(thisCards[cardIdx], token);
+      }
+  );
+
+  return {
+    updateCards,
+    transportBoard,
+    transportCard,
+    removeBoard,
+    removeCard,
+  };
 };

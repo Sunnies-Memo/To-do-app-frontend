@@ -13,6 +13,16 @@ import {
 } from "./interface/todo-interface";
 import { IUserState } from "./interface/auth-interface";
 
+export interface IBoardOrder {
+  boardId: string;
+  orderIndex: number;
+}
+
+export const orderedBoardList = atom<IBoardOrder[]>({
+  key: "orderedBoardList",
+  default: [],
+});
+
 export const boardAtomFamily = atomFamily<IBoard, string>({
   key: "boardAtomFamily",
   default: (boardId: string) => ({
@@ -24,8 +34,18 @@ export const boardAtomFamily = atomFamily<IBoard, string>({
   }),
 });
 
-export const toDoListSelector = selectorFamily<ITodo[] | undefined, string>({
-  key: "toDoList",
+export const boardOrderSelector = selectorFamily<number, string>({
+  key: "boardOrder",
+  get:
+    (boardId: string) =>
+    ({ get }) => {
+      const boardOrder = get(boardAtomFamily(boardId)).orderIndex;
+      return boardOrder;
+    },
+});
+
+export const cardListSelector = selectorFamily<ITodo[] | undefined, string>({
+  key: "cardList",
   get:
     (boardId: string) =>
     ({ get }) => {
@@ -51,9 +71,9 @@ export const lastToDoIndexSelector = selectorFamily<number, string>({
   get:
     (boardId: string) =>
     ({ get }) => {
-      const toDoList = get(toDoListSelector(boardId));
-      if (toDoList !== undefined) {
-        let lastIndex = toDoList[toDoList.length - 1].orderIndex;
+      const cardList = get(cardListSelector(boardId));
+      if (cardList !== undefined) {
+        let lastIndex = cardList[cardList.length - 1].orderIndex;
         lastIndex = lastIndex ? lastIndex : 0;
         return lastIndex;
       } else {

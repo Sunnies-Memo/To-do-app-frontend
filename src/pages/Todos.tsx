@@ -1,12 +1,25 @@
 import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
+import {
+  boardOrderSelector,
+  boardState,
+  cardDrop,
+  IBoardOrder,
+  lastBoardIndex,
+  orderdBoardList,
+  toDoState,
+} from "../atoms";
 import { Suspense, useEffect, useState } from "react";
 import BoardForm from "../components/board-form";
 
 import TrashCan from "../components/TrashBin";
-import { StrictModeDroppable, useAuth, useUpdateToDos } from "../util";
+import {
+  StrictModeDroppable,
+  useAuth,
+  useToDos,
+  useUpdateToDos,
+} from "../util";
 import { IBoard, IBoardUpdate, IToDoState } from "../interface/todo-interface";
 import {
   deleteBoard,
@@ -40,7 +53,10 @@ export default function TodosPage() {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
   const token = isLogin();
-  const updateData = useUpdateToDos();
+  const { updateToDos, moveCard } = useToDos();
+  // const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
+  // const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
+  const [boards, setBoards] = useRecoilState<IBoardOrder[]>(orderdBoardList);
 
   const setLastBIndex = useSetRecoilState(lastBoardIndex);
 
@@ -67,7 +83,7 @@ export default function TodosPage() {
     }
     if (fetchedData != null) {
       try {
-        updateData(fetchedData);
+        updateToDos(fetchedData);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");
       }
@@ -76,12 +92,12 @@ export default function TodosPage() {
   }, [fetchedData, isLogin]);
 
   useEffect(() => {
-    if (fetchedData !== undefined && fetchedData.length > 0) {
+    if (boards.length > 0) {
       setLastBIndex((prev) => {
-        return fetchedData[fetchedData.length - 1].orderIndex;
+        return boards[boards.length - 1].orderIndex;
       });
     }
-  }, [fetchedData, setLastBIndex]);
+  }, [boards, setLastBIndex]);
 
   const onDragStart = (info: DragStart) => {
     setShowTrashCan(true);
@@ -149,7 +165,7 @@ export default function TodosPage() {
         return;
       }
       let gap: number = nextIndex ? nextIndex - currIndex : 999;
-      let thisBoard: IBoard = {
+      let thisBoard: IBoardOrder = {
         ...boards[source.index],
         orderIndex: currIndex,
       };
@@ -256,6 +272,13 @@ export default function TodosPage() {
         };
         return newToDoObj;
       });
+
+      await moveCard(
+        boards[Number(source.droppableId)].boardId,
+        source.index,
+        boards[Number(destination.droppableId)].boardId,
+        destination.index
+      );
 
       await moveToDo(thisTodo, gap, token);
       if (gap <= 3) {
@@ -414,7 +437,7 @@ export default function TodosPage() {
                 ref={magic.innerRef}
                 {...magic.droppableProps}
               >
-                {fetchedData?.map((board, index) => {
+                {boards.map((board, index) => {
                   return (
                     <Board
                       boardId={board.boardId}

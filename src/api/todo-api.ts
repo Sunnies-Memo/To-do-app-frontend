@@ -1,3 +1,4 @@
+import { IBoardOrder } from "../atoms";
 import {
   IBoard,
   IBoardCreate,
@@ -33,7 +34,7 @@ export async function getBoards(
 }
 
 export async function moveBoard(
-  board: IBoard,
+  board: IBoardOrder,
   gap: number,
   token: string,
   retry = true
