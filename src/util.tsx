@@ -292,9 +292,6 @@ export const useToDos = () => {
             orderIndex: currIndex,
           };
           set(boardAtomFamily(destinationId), (prev) => {
-            console.log("prevIdx", prevIndex);
-            console.log("currIdx", currIndex);
-            console.log("nextIdx", nextIndex);
             const cardListCopy = prev.toDoList ? [...prev.toDoList] : [];
             const taskObj: ITodo = {
               ...cardListCopy[sourceIdx],
