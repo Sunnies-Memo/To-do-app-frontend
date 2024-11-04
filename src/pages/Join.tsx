@@ -97,6 +97,7 @@ export default function JoinPage() {
     register,
     formState: { errors },
     watch,
+    setError,
   } = useForm<IRegisterForm>();
   const password = watch("password");
   const onValid = async (data: IRegisterForm) => {
@@ -104,8 +105,12 @@ export default function JoinPage() {
       if (data.password !== data.password2) {
         throw new Error("check your password again");
       }
-      await doRegister(data);
-      navigate("/login");
+      const isNewId = await doRegister(data);
+      if (isNewId) {
+        navigate("/login");
+      } else {
+        setError("username", { message: "This username is already exist." });
+      }
     } catch (error) {
       alert("Fail to sign in");
     }

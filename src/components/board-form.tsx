@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
-import { lastBoardIndex, userState } from "../atoms";
+import { lastBoardIndex, userNameSelector } from "../atoms";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
@@ -106,7 +106,8 @@ const formVarients = {
 
 function BoardForm({ token }: { token: string | null }) {
   const queryClient = useQueryClient();
-  const userData = useRecoilValue(userState);
+  const userName = useRecoilValue(userNameSelector);
+
   const wrapperRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -161,7 +162,7 @@ function BoardForm({ token }: { token: string | null }) {
     const newBoard = {
       title: title,
       orderIndex: lastBIndex + 40,
-      username: userData.username,
+      username: userName,
     };
     createBoardMutation.mutate(newBoard);
     setValue("title", "");

@@ -1,13 +1,12 @@
-import {
-  IBoard,
-  IBoardCreate,
-  IBoardUpdate,
-  ITodo,
-} from "../interface/todo-interface";
+import { IBoardCreate, IBoardUpdate, ITodo } from "../interface/todo-interface";
 import { doRefresh } from "./auth-api";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/boards`;
 
-export async function getBoards(token: string | null, retry = true) {
+export async function getBoards(
+  token: string | null,
+  retry = true
+): Promise<any> {
+  console.log("getBoards called");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -15,7 +14,7 @@ export async function getBoards(token: string | null, retry = true) {
     });
     if (response.status === 401 && retry) {
       const newAccessToken: string = await doRefresh();
-      getBoards(newAccessToken, (retry = false));
+      return getBoards(newAccessToken, (retry = false));
     }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
@@ -29,11 +28,11 @@ export async function getBoards(token: string | null, retry = true) {
 }
 
 export async function moveBoard(
-  board: IBoard,
+  board: IBoardUpdate,
   gap: number,
   token: string,
   retry = true
-) {
+): Promise<any> {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -46,7 +45,7 @@ export async function moveBoard(
     });
     if (response.status === 401 && retry) {
       const newAccessToken: string = await doRefresh();
-      moveBoard(board, gap, newAccessToken, (retry = false));
+      return moveBoard(board, gap, newAccessToken, (retry = false));
     }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
@@ -63,7 +62,8 @@ export async function createBoard(
   board: IBoardCreate,
   token: string | null,
   retry = true
-) {
+): Promise<any> {
+  console.log("creating board..", board);
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -76,7 +76,7 @@ export async function createBoard(
     });
     if (response.status === 401 && retry) {
       const newAccessToken: string = await doRefresh();
-      createBoard(board, newAccessToken, (retry = false));
+      return createBoard(board, newAccessToken, (retry = false));
     }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
@@ -93,7 +93,7 @@ export async function deleteBoard(
   board: IBoardUpdate,
   token: string,
   retry = true
-) {
+): Promise<any> {
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
@@ -106,7 +106,7 @@ export async function deleteBoard(
     });
     if (response.status === 401 && retry) {
       const newAccessToken: string = await doRefresh();
-      deleteBoard(board, newAccessToken, (retry = false));
+      return deleteBoard(board, newAccessToken, (retry = false));
     }
     if (!response.ok) {
       const errorMessage = `Error: ${response.status} - ${response.statusText}`;
