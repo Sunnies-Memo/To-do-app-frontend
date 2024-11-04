@@ -124,9 +124,7 @@ export const useToDos = () => {
             );
             if (!_.isEqual(newBoard, oldBoard)) {
               set(boardAtomFamily(newBoard.boardId), newBoard);
-              console.log("board updated", newBoard.title);
             }
-            console.log("in updateCards", newBoard);
             return {
               boardId: newBoard.boardId,
               title: newBoard.title,
@@ -151,32 +149,38 @@ export const useToDos = () => {
 
         //아무것도 없는 위치
         if (
-          orderedBoards[destinationIdx - 1] == null &&
-          orderedBoards[destinationIdx + 1] == null
+          orderedBoards[destinationIdx - 1] === undefined &&
+          orderedBoards[destinationIdx + 1] === undefined
         ) {
           prevIndex = 0;
           nextIndex = 0;
         }
 
         //맨 앞 이동
-        else if (orderedBoards[destinationIdx - 1] == null) {
+        else if (orderedBoards[destinationIdx - 1] === undefined) {
           prevIndex = null;
           nextIndex = orderedBoards[destinationIdx].orderIndex;
         }
 
         //맨 뒤로 이동
-        else if (orderedBoards[destinationIdx + 1] == null) {
+        else if (orderedBoards[destinationIdx + 1] === undefined) {
           prevIndex = orderedBoards[destinationIdx].orderIndex;
           nextIndex = null;
         }
 
         //맨 앞에서 뒤로 이동
-        else if (orderedBoards[sourceIdx - 1] == null) {
+        else if (orderedBoards[sourceIdx - 1] === undefined) {
           prevIndex = orderedBoards[destinationIdx].orderIndex;
           nextIndex = orderedBoards[destinationIdx + 1].orderIndex;
         }
 
-        //그 외
+        //바로 뒤와 바꾸는 경우
+        else if (destinationIdx - sourceIdx === 1) {
+          prevIndex = orderedBoards[destinationIdx].orderIndex;
+          nextIndex = orderedBoards[destinationIdx + 1].orderIndex;
+        }
+
+        //그외
         else {
           prevIndex = orderedBoards[destinationIdx - 1].orderIndex;
           nextIndex = orderedBoards[destinationIdx].orderIndex;
@@ -198,11 +202,12 @@ export const useToDos = () => {
           orderIndex: currIndex,
           username: username,
         };
-
         set(orderedBoardList, (prev) => {
           const boardsCopy = [...prev];
+          console.log("before ", boardsCopy);
           boardsCopy.splice(sourceIdx, 1);
           boardsCopy.splice(destinationIdx, 0, thisBoard);
+          console.log("after ", boardsCopy);
           return boardsCopy;
         });
 
@@ -259,9 +264,10 @@ export const useToDos = () => {
           }
 
           //그 외
-          else if (destinationCards[sourceIdx - 1] === undefined) {
+          //바로 뒤와 바꾸기
+          else if (destinationIdx - sourceIdx === 1) {
             prevIndex = destinationCards[destinationIdx].orderIndex;
-            nextIndex = destinationCards[destinationIdx].orderIndex;
+            nextIndex = destinationCards[destinationIdx + 1].orderIndex;
           } else {
             prevIndex = destinationCards[destinationIdx - 1].orderIndex;
             nextIndex = destinationCards[destinationIdx].orderIndex;
@@ -286,6 +292,9 @@ export const useToDos = () => {
             orderIndex: currIndex,
           };
           set(boardAtomFamily(destinationId), (prev) => {
+            console.log("prevIdx", prevIndex);
+            console.log("currIdx", currIndex);
+            console.log("nextIdx", nextIndex);
             const cardListCopy = prev.toDoList ? [...prev.toDoList] : [];
             const taskObj: ITodo = {
               ...cardListCopy[sourceIdx],

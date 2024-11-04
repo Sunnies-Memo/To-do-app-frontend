@@ -108,19 +108,6 @@ export default function TodosPage() {
   const onDragEnd = async (info: DropResult) => {
     const { destination, source } = info;
     const token = isLogin();
-    console.log("onDragEnd Boards : ", boards);
-    console.log(
-      "onDragEnd sourceBoard : ",
-      source.droppableId,
-      boards[Number(source.droppableId)]
-    );
-    console.log(
-      "onDragEnd destinationBoard : ",
-      destination?.droppableId,
-      boards[Number(destination?.droppableId)]
-    );
-    console.log("sourece idx : ", source.index);
-    console.log("destinatino idx : ", destination?.index);
     if (
       !token ||
       !destination ||
