@@ -81,6 +81,20 @@ export const lastToDoIndexSelector = selectorFamily<number, string>({
     },
 });
 
+export const lastBoardIndexSelector = selector<number>({
+  key: "lastBIndex",
+  get: ({ get }) => {
+    const boardList = get(orderedBoardList);
+    if (boardList !== undefined) {
+      let lastIndex = boardList[boardList.length - 1]?.orderIndex;
+      lastIndex = lastIndex ? lastIndex : 100;
+      return lastIndex;
+    } else {
+      return 100;
+    }
+  },
+});
+
 export const toDoState = atom<IToDoState>({
   key: "toDo",
   default: {},
@@ -94,11 +108,6 @@ export const boardState = atom<IBoardUpdate[]>({
 export const cardDrop = atom({
   key: "cardDrop",
   default: false,
-});
-
-export const lastBoardIndex = atom<number>({
-  key: "lastBIndex",
-  default: 100,
 });
 
 //유저 관련
@@ -153,8 +162,3 @@ export const isAuthenticated = selector({
     else return false;
   },
 });
-
-// export const userProfileSelector = selector({
-//   key: "userProfileSelector",
-//   get: async () => {},
-// });

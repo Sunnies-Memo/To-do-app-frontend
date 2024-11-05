@@ -1,12 +1,7 @@
 import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import {
-  cardDrop,
-  lastBoardIndex,
-  orderedBoardList,
-  userNameSelector,
-} from "../atoms";
+import { cardDrop, orderedBoardList, userNameSelector } from "../atoms";
 import { Suspense, useEffect, useState } from "react";
 import BoardForm from "../components/board-form";
 
@@ -48,7 +43,6 @@ export default function TodosPage() {
   } = useToDos();
   const boards = useRecoilValue<IBoardOrder[]>(orderedBoardList);
   const username = useRecoilValue(userNameSelector);
-  const setLastBIndex = useSetRecoilState(lastBoardIndex);
 
   const setCardDrop = useSetRecoilState(cardDrop);
   const [boardDrop, setBoardDrop] = useState(false);
@@ -84,14 +78,6 @@ export default function TodosPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedData, isLogin]);
-
-  useEffect(() => {
-    if (boards.length > 0) {
-      setLastBIndex((prev) => {
-        return boards[boards.length - 1].orderIndex;
-      });
-    }
-  }, [boards, setLastBIndex]);
 
   const onDragStart = (info: DragStart) => {
     setShowTrashCan(true);
