@@ -5,13 +5,7 @@ import {
   selector,
   selectorFamily,
 } from "recoil";
-import {
-  IBoard,
-  IBoardOrder,
-  IBoardUpdate,
-  ITodo,
-  IToDoState,
-} from "./interface/todo-interface";
+import { IBoard, IBoardOrder, ITodo } from "./interface/todo-interface";
 import { IUserState } from "./interface/auth-interface";
 import { IUserProfile } from "./interface/profie-interface";
 import { getProfile } from "./api/profile-api";
@@ -93,16 +87,6 @@ export const lastBoardIndexSelector = selector<number>({
       return 100;
     }
   },
-});
-
-export const toDoState = atom<IToDoState>({
-  key: "toDo",
-  default: {},
-});
-
-export const boardState = atom<IBoardUpdate[]>({
-  key: "boards",
-  default: [],
 });
 
 export const cardDrop = atom({
