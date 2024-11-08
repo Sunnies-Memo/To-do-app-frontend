@@ -27,16 +27,6 @@ export const boardAtomFamily = atomFamily<IBoard, string>({
   }),
 });
 
-export const boardOrderSelector = selectorFamily<number, string>({
-  key: "boardOrder",
-  get:
-    (boardId: string) =>
-    ({ get }) => {
-      const boardOrder = get(boardAtomFamily(boardId)).orderIndex;
-      return boardOrder;
-    },
-});
-
 export const cardListSelector = selectorFamily<ITodo[] | undefined, string>({
   key: "cardList",
   get:

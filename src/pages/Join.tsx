@@ -16,7 +16,6 @@ const Title = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 12% 0 5% 0;
   & > span {
     font-size: 25px;
   }
@@ -25,6 +24,7 @@ const Title = styled.div`
 const JoinPageBox = styled(motion.div)`
   display: flex;
   flex-direction: column;
+  justify-content: space-evenly;
   width: 60%;
   min-width: 300px;
   height: 50%;
@@ -38,6 +38,7 @@ const JoinForm = styled.form`
   width: 100%;
   flex-direction: column;
   align-items: center;
+
   input {
     height: 25px;
     border-radius: 10px;
