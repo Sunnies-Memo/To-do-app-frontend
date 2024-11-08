@@ -1,13 +1,13 @@
 import { styled } from "styled-components";
-import { cardDrop } from "../atoms";
+import { cardDrop, cardListSelector, lastToDoIndexSelector } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { createToDo } from "../api/todo-api";
-import DragableCard from "./dragable-card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import DraggableCard from "./draggable-card";
 
 interface IAreaProps {
   isDraggingOver: boolean;
@@ -62,25 +62,27 @@ const Form = styled.form`
 `;
 interface IBoardProps {
   index: number;
-  toDos: ITodo[];
-  board: IBoard;
+  boardId: string;
+  title: string;
   token: string | null;
 }
 
-function Board({ index, toDos, board, token }: IBoardProps) {
+function Board({ index, boardId, title, token }: IBoardProps) {
   const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);
+  const toDoList = useRecoilValue(cardListSelector(boardId));
+  const lastIndex = useRecoilValue(lastToDoIndexSelector(boardId));
 
   const lastIndexRef = useRef(100);
   useEffect(() => {
-    const lastIndex = toDos[toDos.length - 1]?.orderIndex;
     lastIndexRef.current = lastIndex ? lastIndex : 0;
-  }, [toDos]);
+  }, [lastIndex]);
 
   const createToDoMutation = useMutation({
     mutationFn: (newTodo: ITodo) => createToDo(newTodo, token),
     onMutate: async (newTodo: ITodo) => {
+      console.log("on mutate todo", newTodo);
       await queryClient.cancelQueries({ queryKey: ["boards data", token] });
       const prevData = queryClient.getQueryData<IBoard[]>([
         "boards data",
@@ -90,7 +92,7 @@ function Board({ index, toDos, board, token }: IBoardProps) {
       queryClient.setQueryData<IBoard[]>(["boards data", token], (prev) => {
         if (!prev) return prevData;
         return prevData?.map((thisboard) => {
-          if (thisboard.boardId === board.boardId) {
+          if (thisboard.boardId === boardId) {
             return {
               ...thisboard,
               toDoList: !thisboard.toDoList
@@ -106,7 +108,7 @@ function Board({ index, toDos, board, token }: IBoardProps) {
     },
     onError: (_err, _newTodo, context) => {
       queryClient.setQueryData(["boards data", token], context?.prevData);
-      alert("Error");
+      console.log("cannot create card", _err);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["boards data", token] });
@@ -116,35 +118,31 @@ function Board({ index, toDos, board, token }: IBoardProps) {
   const onValid = async (todo: ITodo) => {
     if (!token) return;
     const newTodo: ITodo = {
-      board: board,
       text: todo.text,
+      board: { boardId },
       orderIndex: lastIndexRef.current + 40,
     };
     createToDoMutation.mutate(newTodo);
     setValue("text", "");
   };
   return (
-    <Draggable
-      key={board.boardId}
-      draggableId={board.boardId + ""}
-      index={index}
-    >
+    <Draggable key={boardId} draggableId={boardId + ""} index={index}>
       {(magic) => (
         <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
           <Title {...magic.dragHandleProps}>
-            <span>{board.title}</span>
+            <span>{title}</span>
           </Title>
           <Form onSubmit={handleSubmit(onValid)}>
             <input
               {...register("text", { required: true })}
               type="text"
-              placeholder={`Add task on ${board.title}`}
+              placeholder={`Add task on ${title}`}
             />
           </Form>
           <Droppable
             droppableId={index + ""}
             isDropDisabled={isCardDrop}
-            key={board.boardId}
+            key={boardId}
           >
             {(magic, snapshot) => (
               <Area
@@ -153,9 +151,9 @@ function Board({ index, toDos, board, token }: IBoardProps) {
                 isDraggingOver={snapshot.isDraggingOver}
                 isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
               >
-                {toDos.map((todo, index) => {
+                {toDoList?.map((todo, index) => {
                   return (
-                    <DragableCard
+                    <DraggableCard
                       key={todo.todoId}
                       index={index}
                       toDoId={todo.todoId}

@@ -16,7 +16,6 @@ const Title = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 12% 0 5% 0;
   & > span {
     font-size: 25px;
   }
@@ -25,6 +24,7 @@ const Title = styled.div`
 const JoinPageBox = styled(motion.div)`
   display: flex;
   flex-direction: column;
+  justify-content: space-evenly;
   width: 60%;
   min-width: 300px;
   height: 50%;
@@ -38,6 +38,7 @@ const JoinForm = styled.form`
   width: 100%;
   flex-direction: column;
   align-items: center;
+
   input {
     height: 25px;
     border-radius: 10px;
@@ -97,6 +98,7 @@ export default function JoinPage() {
     register,
     formState: { errors },
     watch,
+    setError,
   } = useForm<IRegisterForm>();
   const password = watch("password");
   const onValid = async (data: IRegisterForm) => {
@@ -104,8 +106,12 @@ export default function JoinPage() {
       if (data.password !== data.password2) {
         throw new Error("check your password again");
       }
-      await doRegister(data);
-      navigate("/login");
+      const isNewId = await doRegister(data);
+      if (isNewId) {
+        navigate("/login");
+      } else {
+        setError("username", { message: "This username is already exist." });
+      }
     } catch (error) {
       alert("Fail to sign in");
     }

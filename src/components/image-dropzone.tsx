@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
-import { DropZoneProps } from "../interface/profie-interface";
+import { IDropZoneProps } from "../interface/profie-interface";
 
 const Zone = styled.div`
   border: 2px dotted ${(props) => props.theme.dropArea.fromThis};
@@ -21,7 +21,7 @@ const Zone = styled.div`
   }
 `;
 
-export function ImageDropZone({ username, token, uploadFn }: DropZoneProps) {
+export function ImageDropZone({ username, token, uploadFn }: IDropZoneProps) {
   const queryClient = useQueryClient();
 
   const uploadImgMutation = useMutation({

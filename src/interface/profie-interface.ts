@@ -13,7 +13,7 @@ export interface IUploadImg {
   imgData: File | null;
 }
 
-export interface DropZoneProps {
+export interface IDropZoneProps {
   username: string;
   token: string;
   uploadFn: (data: IUploadImg, token: string) => Promise<any>;

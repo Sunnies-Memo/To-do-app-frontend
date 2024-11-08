@@ -1,23 +1,17 @@
 import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { boardState, cardDrop, lastBoardIndex, toDoState } from "../atoms";
+import { cardDrop, orderedBoardList, userNameSelector } from "../atoms";
 import { Suspense, useEffect, useState } from "react";
-import BoardForm from "../components/create-board";
+import BoardForm from "../components/board-form";
 
 import TrashCan from "../components/TrashBin";
-import { StrictModeDroppable, useAuth, useUpdateToDos } from "../util";
-import { IBoard, IBoardUpdate, IToDoState } from "../interface/todo-interface";
-import {
-  deleteBoard,
-  deleteToDo,
-  getBoards,
-  moveBoard,
-  moveToDo,
-} from "../api/todo-api";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { StrictModeDroppable, useAuth, useToDos } from "../util";
+import { IBoard, IBoardOrder } from "../interface/todo-interface";
+import { getBoards } from "../api/todo-api";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import Board from "../components/board";
+import Board from "../components/Board";
 
 const Wrapper = styled.div`
   display: flex;
@@ -38,49 +32,52 @@ const Boards = styled.div`
 
 export default function TodosPage() {
   const navigate = useNavigate();
-  const { isLogin } = useAuth();
+  const { isLogin, refresh } = useAuth();
   const token = isLogin();
-  const updateData = useUpdateToDos();
-  const [toDos, setToDos] = useRecoilState<IToDoState>(toDoState);
-  const [boards, setBoards] = useRecoilState<IBoardUpdate[]>(boardState);
-
-  const setLastBIndex = useSetRecoilState(lastBoardIndex);
+  const {
+    updateCards,
+    transportBoard,
+    transportCard,
+    removeBoard,
+    removeCard,
+  } = useToDos();
+  const boards = useRecoilValue<IBoardOrder[]>(orderedBoardList);
+  const username = useRecoilValue(userNameSelector);
 
   const setCardDrop = useSetRecoilState(cardDrop);
   const [boardDrop, setBoardDrop] = useState(false);
   const [showTrashCan, setShowTrashCan] = useState(false);
 
-  const queryClient = useQueryClient();
   const { data: fetchedData, isError } = useQuery<IBoard[]>({
     queryKey: ["boards data", token],
     queryFn: async () => getBoards(token),
+    staleTime: 1000 * 60 * 15,
+    refetchOnMount: false,
+    enabled: token !== null,
   });
 
-  if (isError) {
-    navigate("/login");
-  }
+  useEffect(() => {
+    if (isError) {
+      navigate("/login");
+    }
+  }, [isError, navigate]);
 
   useEffect(() => {
     if (!isLogin()) {
       navigate("/login");
     }
+    if (username.length === 0) {
+      refresh();
+    }
     if (fetchedData != null) {
       try {
-        updateData(fetchedData);
+        updateCards(fetchedData);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedData, isLogin]);
-
-  useEffect(() => {
-    if (boards.length > 0) {
-      setLastBIndex((prev) => {
-        return boards[boards.length - 1].orderIndex;
-      });
-    }
-  }, [boards, setLastBIndex]);
 
   const onDragStart = (info: DragStart) => {
     setShowTrashCan(true);
@@ -97,7 +94,6 @@ export default function TodosPage() {
   const onDragEnd = async (info: DropResult) => {
     const { destination, source } = info;
     const token = isLogin();
-
     if (
       !token ||
       !destination ||
@@ -108,288 +104,36 @@ export default function TodosPage() {
       return;
     }
 
-    if (destination.droppableId === "boards") {
-      //board 이동
-      //db의 board orderIndex 수정
-      let prevIndex: number | null;
-      let nextIndex: number | null;
-      if (
-        boards[destination.index - 1] == null &&
-        boards[destination.index + 1] == null
-      ) {
-        //아무것도 없는 위치로 이동
-        prevIndex = 0;
-        nextIndex = 0;
-      } else if (boards[destination.index - 1] == null) {
-        //맨 앞으로 이동
-        prevIndex = null;
-        nextIndex = boards[destination.index].orderIndex;
-      } else if (boards[destination.index + 1] == null) {
-        //맨 뒤로 이동
-        prevIndex = boards[destination.index].orderIndex;
-        nextIndex = null;
-      } else if (boards[source.index - 1] == null) {
-        //맨 앞에서 뒤로 이동
-        prevIndex = boards[destination.index].orderIndex;
-        nextIndex = boards[destination.index + 1].orderIndex;
-      } else {
-        prevIndex = boards[destination.index - 1].orderIndex;
-        nextIndex = boards[destination.index].orderIndex;
-      }
-
-      let currIndex: number;
-      if (prevIndex != null && nextIndex != null) {
-        currIndex = Math.floor((prevIndex + nextIndex) / 2);
-      } else if (prevIndex == null && nextIndex) {
-        currIndex = Math.floor(nextIndex / 2);
-      } else if (nextIndex == null && prevIndex) {
-        currIndex = prevIndex + 10;
-      } else {
-        return;
-      }
-      let gap: number = nextIndex ? nextIndex - currIndex : 999;
-      let thisBoard: IBoard = {
-        ...boards[source.index],
-        orderIndex: currIndex,
-      };
-
-      setBoards((boards) => {
-        const boardsCopy = [...boards];
-        const taskBoard = {
-          ...boardsCopy[source.index],
-          orderIndex: currIndex,
-        };
-        boardsCopy.splice(source.index, 1);
-        boardsCopy.splice(destination.index, 0, taskBoard);
-        return boardsCopy;
-      });
-
-      await moveBoard(thisBoard, gap, token);
-      if (gap <= 3) {
-        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
-      }
-    } else if (destination.droppableId === source.droppableId) {
-      //같은 board간 이동
-      //db의 todo card orderIndex 수정
-      let prevIndex: number | undefined;
-      let nextIndex: number | undefined;
-
-      if (
-        toDos[boards[Number(source.droppableId)].boardId][
-          destination.index - 1
-        ] === undefined &&
-        toDos[boards[Number(source.droppableId)].boardId][
-          destination.index + 1
-        ] === undefined
-      ) {
-        //아무것도 없는 board로 이동
-        prevIndex = undefined;
-        nextIndex = undefined;
-      } else if (
-        toDos[boards[Number(source.droppableId)].boardId][
-          destination.index - 1
-        ] === undefined
-      ) {
-        //맨 앞으로 이동
-        prevIndex = undefined;
-        nextIndex =
-          toDos[boards[Number(source.droppableId)].boardId][destination.index]
-            .orderIndex;
-      } else if (
-        toDos[boards[Number(source.droppableId)].boardId][
-          destination.index + 1
-        ] === undefined
-      ) {
-        //맨 뒤로 이동
-        prevIndex =
-          toDos[boards[Number(source.droppableId)].boardId][destination.index]
-            .orderIndex;
-        nextIndex = undefined;
-      } else if (
-        toDos[boards[Number(source.droppableId)].boardId][source.index - 1] ===
-        undefined
-      ) {
-        prevIndex =
-          toDos[boards[Number(source.droppableId)].boardId][destination.index]
-            .orderIndex;
-        nextIndex =
-          toDos[boards[Number(source.droppableId)].boardId][
-            destination.index + 1
-          ].orderIndex;
-      } else {
-        prevIndex =
-          toDos[boards[Number(source.droppableId)].boardId][
-            destination.index - 1
-          ].orderIndex;
-        nextIndex =
-          toDos[boards[Number(source.droppableId)].boardId][destination.index]
-            .orderIndex;
-      }
-
-      let currIndex: number;
-      if (prevIndex != null && nextIndex != null) {
-        currIndex = Math.floor((prevIndex + nextIndex) / 2);
-      } else if (prevIndex == null && nextIndex == null) {
-        currIndex = 10;
-      } else if (prevIndex == null && nextIndex) {
-        currIndex = Math.floor(nextIndex / 2);
-      } else if (nextIndex == null && prevIndex) {
-        currIndex = prevIndex + 10;
-      } else {
-        return;
-      }
-
-      let gap: number = nextIndex ? nextIndex - currIndex : 999;
-      let thisTodo = {
-        ...toDos[boards[Number(source.droppableId)].boardId][source.index],
-        orderIndex: currIndex,
-      };
-      setToDos((prev) => {
-        const boardCopy = [...prev[boards[Number(source.droppableId)].boardId]];
-        const taskObj = { ...boardCopy[source.index], orderIndex: currIndex };
-        boardCopy.splice(source.index, 1);
-        boardCopy.splice(destination?.index, 0, taskObj);
-        const newToDoObj = {
-          ...prev,
-          [boards[Number(source.droppableId)].boardId]: boardCopy,
-        };
-        return newToDoObj;
-      });
-
-      await moveToDo(thisTodo, gap, token);
-      if (gap <= 3) {
-        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
-      }
-    }
-
-    if (destination.droppableId === "trashBin") {
+    //삭제
+    else if (destination.droppableId === "trashBin") {
       if (source.droppableId === "boards") {
         //board 삭제
-        setBoards((prev) => {
-          const boardsCopy = [...prev];
-          boardsCopy.splice(source.index, 1);
-          return boardsCopy;
-        });
-        setToDos((prev) => {
-          const newObj = { ...prev };
-          delete newObj[boards[source.index].boardId];
-          return newObj;
-        });
-        await deleteBoard(boards[source.index], token);
-        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
+        removeBoard(boards[Number(source.index)].boardId, token);
       } else {
         //todo card 삭제
-        setToDos((prev) => {
-          const boardCopy = [
-            ...prev[boards[Number(source.droppableId)].boardId],
-          ];
-          boardCopy.splice(source.index, 1);
-          const newToDoObj = {
-            ...prev,
-            [boards[Number(source.droppableId)].boardId]: boardCopy,
-          };
-          return newToDoObj;
-        });
-        await deleteToDo(
-          toDos[boards[Number(source.droppableId)].boardId][source.index],
+        console.log(boards[Number(source.droppableId)]);
+        removeCard(
+          boards[Number(source.droppableId)].boardId,
+          source.index,
           token
         );
       }
-    } else if (destination.droppableId !== source.droppableId) {
-      //card Cross board movement
-      //db의 todo card orderIndex 수정
-      let prevIndex: number | undefined;
-      let nextIndex: number | undefined;
-      if (
-        toDos[boards[Number(destination.droppableId)].boardId][
-          destination.index - 1
-        ] === undefined &&
-        toDos[boards[Number(destination.droppableId)].boardId][
-          destination.index
-        ] === undefined
-      ) {
-        //아무것도 없는 board로 이동
-        prevIndex = undefined;
-        nextIndex = undefined;
-      } else if (
-        toDos[boards[Number(destination.droppableId)].boardId][
-          destination.index - 1
-        ] === undefined
-      ) {
-        //맨 앞으로 이동
-        prevIndex = undefined;
-        nextIndex =
-          toDos[boards[Number(destination.droppableId)].boardId][
-            destination.index
-          ].orderIndex;
-      } else if (
-        toDos[boards[Number(destination.droppableId)].boardId][
-          destination.index
-        ] === undefined
-      ) {
-        //맨 뒤로 이동
-        prevIndex =
-          toDos[boards[Number(destination.droppableId)].boardId][
-            destination.index - 1
-          ].orderIndex;
-        nextIndex = undefined;
-      } else {
-        prevIndex =
-          toDos[boards[Number(destination.droppableId)].boardId][
-            destination.index - 1
-          ].orderIndex;
-        nextIndex =
-          toDos[boards[Number(destination.droppableId)].boardId][
-            destination.index
-          ].orderIndex;
-      }
+    }
 
-      let currIndex: number;
-      if (prevIndex != null && nextIndex != null) {
-        currIndex = Math.floor((prevIndex + nextIndex) / 2);
-      } else if (prevIndex == null && nextIndex == null) {
-        currIndex = 10;
-      } else if (prevIndex == null && nextIndex) {
-        currIndex = Math.floor(nextIndex / 2);
-      } else if (nextIndex == null && prevIndex) {
-        currIndex = prevIndex + 10;
-      } else {
-        return;
-      }
+    //board 이동
+    else if (destination.droppableId === "boards") {
+      transportBoard(source.index, destination.index, username, token);
+    }
 
-      let gap: number = nextIndex ? nextIndex - currIndex : 999;
-      let thisTodo = {
-        ...toDos[boards[Number(source.droppableId)].boardId][source.index],
-        orderIndex: currIndex,
-        board: boards[Number(destination.droppableId)],
-      };
-
-      setToDos((prev) => {
-        const sourceBoard = [
-          ...prev[boards[Number(source.droppableId)].boardId],
-        ];
-        const targetBoard = [
-          ...prev[boards[Number(destination.droppableId)].boardId],
-        ];
-        const taskObj = {
-          ...sourceBoard[source.index],
-          orderIndex: currIndex,
-          board: boards[Number(destination.droppableId)],
-        };
-        sourceBoard.splice(source.index, 1);
-        targetBoard.splice(destination.index, 0, taskObj);
-        const newToDoObj = {
-          ...prev,
-          [boards[Number(source.droppableId)].boardId]: sourceBoard,
-          [boards[Number(destination.droppableId)].boardId]: targetBoard,
-        };
-        return newToDoObj;
-      });
-
-      await moveToDo(thisTodo, gap, token);
-      if (gap <= 3) {
-        queryClient.invalidateQueries({ queryKey: ["boards data", token] });
-      }
+    //card 이동
+    else {
+      transportCard(
+        boards[Number(source.droppableId)]?.boardId,
+        source.index,
+        boards[Number(destination.droppableId)]?.boardId,
+        destination.index,
+        token
+      );
     }
 
     setShowTrashCan(false);
@@ -416,10 +160,10 @@ export default function TodosPage() {
                 {boards.map((board, index) => {
                   return (
                     <Board
+                      boardId={board.boardId}
+                      title={board.title}
                       index={index}
-                      board={board}
                       key={board.boardId}
-                      toDos={toDos[board.boardId]}
                       token={token}
                     />
                   );
