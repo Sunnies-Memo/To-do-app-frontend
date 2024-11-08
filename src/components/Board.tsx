@@ -68,8 +68,6 @@ interface IBoardProps {
 }
 
 function Board({ index, boardId, title, token }: IBoardProps) {
-  console.log("====boardId : ", boardId);
-  console.log("board droppable Id", index + "");
   const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
   const isCardDrop = useRecoilValue(cardDrop);

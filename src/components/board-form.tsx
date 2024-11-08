@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useRecoilValue } from "recoil";
 import styled from "styled-components";
-import { lastBoardIndex, userNameSelector } from "../atoms";
+import { lastBoardIndexSelector, userNameSelector } from "../atoms";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { IBoard, IBoardCreate, IBoardForm } from "../interface/todo-interface";
@@ -111,7 +111,7 @@ function BoardForm({ token }: { token: string | null }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const lastBIndex = useRecoilValue(lastBoardIndex);
+  const lastBIndex = useRecoilValue(lastBoardIndexSelector);
   const [showForm, setShowForm] = useState(false);
   const { handleSubmit, register, setValue } = useForm<IBoardForm>();
 

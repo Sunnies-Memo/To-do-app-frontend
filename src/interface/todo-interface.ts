@@ -18,9 +18,6 @@ export interface IBoardCreate {
   username: string;
 }
 
-export interface IToDoState {
-  [key: string]: ITodo[];
-}
 export interface ITodo {
   todoId?: string;
   text: string;

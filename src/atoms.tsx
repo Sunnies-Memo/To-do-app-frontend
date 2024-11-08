@@ -5,13 +5,7 @@ import {
   selector,
   selectorFamily,
 } from "recoil";
-import {
-  IBoard,
-  IBoardOrder,
-  IBoardUpdate,
-  ITodo,
-  IToDoState,
-} from "./interface/todo-interface";
+import { IBoard, IBoardOrder, ITodo } from "./interface/todo-interface";
 import { IUserState } from "./interface/auth-interface";
 import { IUserProfile } from "./interface/profie-interface";
 import { getProfile } from "./api/profile-api";
@@ -31,16 +25,6 @@ export const boardAtomFamily = atomFamily<IBoard, string>({
     username: "",
     toDoList: [],
   }),
-});
-
-export const boardOrderSelector = selectorFamily<number, string>({
-  key: "boardOrder",
-  get:
-    (boardId: string) =>
-    ({ get }) => {
-      const boardOrder = get(boardAtomFamily(boardId)).orderIndex;
-      return boardOrder;
-    },
 });
 
 export const cardListSelector = selectorFamily<ITodo[] | undefined, string>({
@@ -81,24 +65,23 @@ export const lastToDoIndexSelector = selectorFamily<number, string>({
     },
 });
 
-export const toDoState = atom<IToDoState>({
-  key: "toDo",
-  default: {},
-});
-
-export const boardState = atom<IBoardUpdate[]>({
-  key: "boards",
-  default: [],
+export const lastBoardIndexSelector = selector<number>({
+  key: "lastBIndex",
+  get: ({ get }) => {
+    const boardList = get(orderedBoardList);
+    if (boardList !== undefined) {
+      let lastIndex = boardList[boardList.length - 1]?.orderIndex;
+      lastIndex = lastIndex ? lastIndex : 100;
+      return lastIndex;
+    } else {
+      return 100;
+    }
+  },
 });
 
 export const cardDrop = atom({
   key: "cardDrop",
   default: false,
-});
-
-export const lastBoardIndex = atom<number>({
-  key: "lastBIndex",
-  default: 100,
 });
 
 //유저 관련
@@ -153,8 +136,3 @@ export const isAuthenticated = selector({
     else return false;
   },
 });
-
-// export const userProfileSelector = selector({
-//   key: "userProfileSelector",
-//   get: async () => {},
-// });
