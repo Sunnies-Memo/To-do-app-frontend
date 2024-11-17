@@ -3,6 +3,7 @@ import { ILoginForm, IRegisterForm } from "../interface/auth-interface";
 const BASE_URL = `${process.env.REACT_APP_SERVER_API}/api/auth`;
 
 export async function doLogin(loginForm: ILoginForm) {
+  console.log("login", loginForm);
   try {
     const response = await fetch(`${BASE_URL}/login`, {
       headers: {
@@ -40,11 +41,11 @@ export async function doLogout(token: string) {
     return true;
   } catch (error) {
     console.error("Fail to logout", error);
-    throw error;
   }
 }
 
 export async function doRegister(registerForm: IRegisterForm) {
+  console.log("register req", JSON.stringify(registerForm));
   try {
     const response = await fetch(`${BASE_URL}/register`, {
       headers: {
