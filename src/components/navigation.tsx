@@ -77,7 +77,7 @@ export default function NavigationBar() {
   };
   useEffect(() => {
     const checkAuth = async () => {
-      if (!isAuthed) {
+      if (!isAuthed && location.pathname !== "/maintenance") {
         const isRefreshed = await refresh();
         if (!isRefreshed && location.pathname !== "/join") {
           navigate("/login");
@@ -95,6 +95,7 @@ export default function NavigationBar() {
   return (
     <>
       {location.pathname === "/login" ||
+      location.pathname === "/maintenance" ||
       location.pathname === "/join" ? null : (
         <NavWrapper>
           <AnimatePresence>

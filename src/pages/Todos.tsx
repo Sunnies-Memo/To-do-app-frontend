@@ -71,6 +71,7 @@ export default function TodosPage() {
     }
     if (fetchedData != null) {
       try {
+        console.log("fetched data", fetchedData);
         updateCards(fetchedData);
       } catch (error) {
         alert("데이터를 가져오지 못했습니다.");

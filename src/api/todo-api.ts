@@ -34,6 +34,7 @@ export async function moveBoard(
   retry = true
 ): Promise<any> {
   try {
+    console.log("moveBoard", JSON.stringify({ board: board, gap: gap }), token);
     const response = await fetch(`${BASE_URL}`, {
       headers: {
         Authorization: `Bearer ${token}`,
