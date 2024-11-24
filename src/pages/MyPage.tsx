@@ -233,7 +233,6 @@ export default function MyPage() {
         setBoxSize(width * 0.4);
       }
     };
-    console.log("handleResize()");
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);

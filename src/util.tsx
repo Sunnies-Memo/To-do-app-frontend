@@ -204,10 +204,8 @@ export const useToDos = () => {
         };
         set(orderedBoardList, (prev) => {
           const boardsCopy = [...prev];
-          console.log("before ", boardsCopy);
           boardsCopy.splice(sourceIdx, 1);
           boardsCopy.splice(destinationIdx, 0, thisBoard);
-          console.log("after ", boardsCopy);
           return boardsCopy;
         });
 

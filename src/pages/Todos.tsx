@@ -112,7 +112,6 @@ export default function TodosPage() {
         removeBoard(boards[Number(source.index)].boardId, token);
       } else {
         //todo card 삭제
-        console.log(boards[Number(source.droppableId)]);
         removeCard(
           boards[Number(source.droppableId)].boardId,
           source.index,

@@ -82,7 +82,6 @@ function Board({ index, boardId, title, token }: IBoardProps) {
   const createToDoMutation = useMutation({
     mutationFn: (newTodo: ITodo) => createToDo(newTodo, token),
     onMutate: async (newTodo: ITodo) => {
-      console.log("on mutate todo", newTodo);
       await queryClient.cancelQueries({ queryKey: ["boards data", token] });
       const prevData = queryClient.getQueryData<IBoard[]>([
         "boards data",
@@ -108,7 +107,6 @@ function Board({ index, boardId, title, token }: IBoardProps) {
     },
     onError: (_err, _newTodo, context) => {
       queryClient.setQueryData(["boards data", token], context?.prevData);
-      console.log("cannot create card", _err);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["boards data", token] });

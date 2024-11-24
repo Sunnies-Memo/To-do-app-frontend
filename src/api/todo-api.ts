@@ -6,7 +6,6 @@ export async function getBoards(
   token: string | null,
   retry = true
 ): Promise<any> {
-  console.log("getBoards called");
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -64,7 +63,6 @@ export async function createBoard(
   token: string | null,
   retry = true
 ): Promise<any> {
-  console.log("creating board..", board);
   try {
     const response = await fetch(`${BASE_URL}`, {
       headers: {
