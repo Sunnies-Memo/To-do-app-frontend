@@ -1,5 +1,5 @@
 import React from "react";
-import { Draggable } from "react-beautiful-dnd";
+import { Draggable } from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
 import { styled } from "styled-components";
 
 interface ICardProps {

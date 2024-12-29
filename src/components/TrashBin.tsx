@@ -1,6 +1,7 @@
 import { styled } from "styled-components";
 import { TrashBin } from "../assets/Icons";
 import { StrictModeDroppable } from "../util";
+import { Droppable } from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
 
 interface IDeleteTodoBox {
   isDraggingOver: boolean;

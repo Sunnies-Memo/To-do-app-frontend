@@ -1,4 +1,8 @@
-import { DragDropContext, DragStart, DropResult } from "react-beautiful-dnd";
+import {
+  DragDropContext,
+  DropResult,
+  DragStart,
+} from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { cardDrop, orderedBoardList, userNameSelector } from "../atoms";

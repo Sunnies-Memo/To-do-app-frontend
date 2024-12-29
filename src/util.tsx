@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { DroppableProps, Droppable } from "react-beautiful-dnd";
+import {
+  DroppableProps,
+  Droppable,
+} from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
 import {
   useRecoilCallback,
   useRecoilState,

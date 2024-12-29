@@ -2,7 +2,10 @@ import { styled } from "styled-components";
 import { cardDrop, cardListSelector, lastToDoIndexSelector } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import {
+  Draggable,
+  Droppable,
+} from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
 import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { createToDo } from "../api/todo-api";
