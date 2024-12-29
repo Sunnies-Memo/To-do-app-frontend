@@ -22,170 +22,202 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   width: 100vw;
-  height: 100vh;
-  display: flex;
+  min-height: 100vh;
+  padding: 2rem;
+  background: ${(props) => props.theme.background};
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.5) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: "✦";
+    position: fixed;
+    font-size: 24px;
+    color: ${(props) => props.theme.primaryAccent};
+    animation: float 3s ease-in-out infinite;
+  }
+
+  &::before {
+    top: 20px;
+    left: 40px;
+  }
+
+  &::after {
+    bottom: 40px;
+    right: 20px;
+    animation-delay: 1.5s;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 `;
 
 const MyPageBox = styled(motion.div)`
+  background: ${(props) => props.theme.gradients.primary};
+  border: ${(props) => props.theme.borders.pixel};
+  border-radius: ${(props) => props.theme.borderRadius};
+  padding: 2rem;
+  box-shadow: 8px 8px 0 rgba(45, 0, 102, 0.2);
+  width: 90%;
+  max-width: 600px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  width: 40%;
-  min-width: 440px;
-  height: auto;
-  min-height: 400px;
-  border-radius: 5px;
-  padding-bottom: 10px;
-  background-color: ${(props) => props.theme.boardColor};
+  gap: 2rem;
 `;
+
 const Title = styled.div`
   display: flex;
-  width: 100%;
-  justify-content: center;
   align-items: center;
-  padding: 10px 0 5px 0;
-  & > span {
-    display: block;
-    padding-bottom: 3px;
-    text-align: center;
-    font-size: 20px;
-    margin-left: 5px;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  span {
+    font-size: 2rem;
+    color: ${(props) => props.theme.textPrimary};
+    font-weight: bold;
+    text-shadow: 2px 2px 0 ${(props) => props.theme.secondaryAccent};
   }
-  & > img {
-    display: block;
-    height: 60px;
+
+  img {
     width: 60px;
-    border-radius: 20px;
-    border: 1px solid black;
-    margin-left: 10%;
+    height: 60px;
+    border-radius: 50%;
+    border: ${(props) => props.theme.borders.pixel};
+    object-fit: cover;
+    box-shadow: 3px 3px 0 ${(props) => props.theme.primaryAccent};
   }
 `;
 
 const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  input {
-    height: 25px;
-    border-radius: 10px;
-    border: none;
-    text-align: center;
-    &:focus {
-      outline: none;
-    }
-    &:disabled {
-      background-color: #f1f6fc;
-    }
-  }
-  & > div {
-    position: relative;
-    width: 80%;
+  gap: 1rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: ${(props) => props.theme.borderRadius};
+  border: ${(props) => props.theme.borders.soft};
+
+  div {
     display: flex;
-    justify-content: center;
     align-items: center;
-    margin: 10px 0 10px 0;
+    gap: 1rem;
+    position: relative;
+
     label {
-      display: inline-block;
-      text-align: center;
-      width: 170px;
-      margin: 0 20px 0 0;
-      font-size: 15px;
+      min-width: 120px;
+      font-weight: bold;
+      color: ${(props) => props.theme.textPrimary};
     }
-    & > button {
-      position: absolute;
-      right: -22%;
-      height: 24px;
-      width: 50px;
+
+    input {
+      flex: 1;
+      padding: 0.8rem;
+      border: ${(props) => props.theme.borders.soft};
+      border-radius: 8px;
+      font-size: 1rem;
+      background: ${(props) => props.theme.background};
+      color: ${(props) => props.theme.textPrimary};
+
+      &:disabled {
+        background: ${(props) => `${props.theme.primaryAccent}40`};
+      }
+    }
+
+    button {
+      padding: 0.5rem 1rem;
       border: none;
-      border-radius: 5px;
-      background-color: ${(props) => props.theme.btnColor.btnDefault};
-      font-size: 12px;
+      border-radius: 8px;
+      background: ${(props) => props.theme.btnColor.btnDefault};
+      color: ${(props) => props.theme.textPrimary};
+      font-weight: bold;
+      transition: all 0.2s ease;
+
       &:hover {
-        background-color: ${(props) => props.theme.btnColor.btnHover};
+        background: ${(props) => props.theme.btnColor.btnHover};
+        transform: translateY(-2px);
       }
     }
   }
 `;
+
 const Form = styled(motion.form)`
   display: flex;
-  width: 100%;
   flex-direction: column;
-  align-items: center;
-  input {
-    height: 25px;
-    border-radius: 10px;
-    border: none;
-    text-align: center;
-    &:focus {
-      outline: none;
-    }
-  }
-  & > a {
-    font-size: 14px;
-  }
-  & > div {
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: ${(props) => props.theme.borderRadius};
+  border: ${(props) => props.theme.borders.soft};
+
+  div {
     position: relative;
-    width: 80%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 12px 0 12px 0;
-    label {
-      display: inline-block;
-      text-align: center;
-      width: 170px;
-      margin: 0 20px 0 0;
-      font-size: 15px;
-    }
-    & > p {
-      display: inline-block;
-      height: 14px;
-      bottom: -18px;
-      width: auto;
+
+    p {
       position: absolute;
-      color: tomato;
-      font-size: 12px;
+      bottom: -20px;
+      left: 0;
+      color: #ff6b6b;
+      font-size: 0.8rem;
     }
   }
 `;
+
 const ChangePwdBtn = styled.button`
-  margin: 15px 0 15px 0;
-  width: 80px;
-  height: 30px;
-  border-radius: 5px;
-  border: none;
-  background-color: ${(props) => props.theme.btnColor.btnDefault};
+  align-self: center;
+  padding: 0.8rem 1.5rem;
+  border: ${(props) => props.theme.borders.pixel};
+  border-radius: ${(props) => props.theme.borderRadius};
+  background: ${(props) => props.theme.btnColor.btnDefault};
+  color: ${(props) => props.theme.textPrimary};
+  font-weight: bold;
+  transition: all 0.2s ease;
+
   &:hover {
-    background-color: ${(props) => props.theme.btnColor.btnHover};
+    background: ${(props) => props.theme.btnColor.btnHover};
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 ${(props) => props.theme.primaryAccent};
   }
 `;
+
 interface IArea {
   size: number;
 }
+
 const ImgDropArea = styled.div<IArea>`
   width: 100%;
-  height: 24vh;
-  display: flex;
-  justify-content: space-around;
+  padding: 1rem;
+  background: white;
+  border-radius: ${(props) => props.theme.borderRadius};
+  border: ${(props) => props.theme.borders.soft};
+
   & > div {
     height: 24vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    border-radius: 5px;
-    border: 1px solid white;
-    padding: 4px;
-    & > span {
-      display: inline-block;
-      text-align: center;
-      padding: 5px 0 8px 0;
+    align-items: center;
+    gap: 1rem;
+
+    span {
+      font-weight: bold;
+      color: ${(props) => props.theme.textPrimary};
     }
   }
-  & > div:first-child {
-    width: 90%;
-  }
 `;
+
 export default function MyPage() {
   const queryClient = useQueryClient();
   const { isLogin } = useAuth();

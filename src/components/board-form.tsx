@@ -14,72 +14,111 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  bottom: 0px;
-  width: 220px;
-  height: 30px;
+  bottom: 2rem;
+  width: 200px;
+  height: 40px;
   overflow: visible;
   z-index: 10;
 `;
+
 const BarWrapper = styled(motion.div)`
   width: 100%;
-  height: 25px;
+  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: ${(props) => props.theme.gradients.primary};
+  border: ${(props) => props.theme.borders.pixel};
+  border-radius: 20px;
+  box-shadow: 4px 4px 0 rgba(45, 0, 102, 0.2);
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
 `;
+
 const Bar = styled.div`
-  width: 100%;
-  height: 7px;
-  border-radius: 5px;
-  background-color: ${(props) => props.theme.themeGray.lightGray};
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: ${(props) => props.theme.textPrimary};
 `;
+
 const Form = styled(motion.form)`
   position: absolute;
-  bottom: 50px;
-  width: 250px;
-  background-color: ${(props) => props.theme.boardColor};
+  bottom: 60px;
+  width: 280px;
+  background: ${(props) => props.theme.gradients.primary};
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  border-radius: 5px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: ${(props) => props.theme.borders.pixel};
+  box-shadow: 6px 6px 0 rgba(45, 0, 102, 0.2);
+
   div {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    margin: 5px;
+    margin-top: 1rem;
+    width: 100%;
+    gap: 0.5rem;
   }
+
   input {
-    width: 80%;
-    height: 25px;
-    border: none;
-    border-radius: 3px;
-    padding: 0 5px 0 5px;
-    box-shadow: rgba(99, 99, 99, 0.3) inset 1px 1px 2px 0px;
-    text-align: center;
+    flex: 1;
+    height: 36px;
+    border: ${(props) => props.theme.borders.soft};
+    border-radius: 8px;
+    padding: 0 0.5rem;
+    font-size: 0.9rem;
+    background: white;
+
+    &:focus {
+      outline: none;
+      border-color: ${(props) => props.theme.primaryAccent};
+      box-shadow: 0 0 0 3px rgba(200, 162, 200, 0.2);
+    }
   }
+
   button {
-    height: 23px;
-    padding: 3px;
-    background-color: ${(props) => props.theme.dropArea.default};
+    padding: 0 0.75rem;
+    height: 36px;
+    background: ${(props) => props.theme.secondaryAccent};
+    color: ${(props) => props.theme.textPrimary};
     border: none;
-    border-radius: 3px;
-    margin-left: 5px;
-  }
-  button:hover {
-    cursor: pointer;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    white-space: nowrap;
+
+    &:hover {
+      background: ${(props) => props.theme.bigBtn.hover};
+      transform: translateY(-2px);
+    }
   }
 `;
 
 const Title = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
+  margin-bottom: 1rem;
+  width: 100%;
+
   span {
-    text-align: center;
-    font-size: 18px;
+    font-size: 1.25rem;
     font-weight: bold;
+    color: ${(props) => props.theme.textPrimary};
+
+    &::before,
+    &::after {
+      content: "✦";
+      margin: 0 0.5rem;
+      color: ${(props) => props.theme.secondaryAccent};
+      font-size: 0.8rem;
+    }
   }
 `;
 

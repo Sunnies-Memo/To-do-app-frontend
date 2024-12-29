@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { cardDrop, orderedBoardList, userNameSelector } from "../atoms";
 import { Suspense, useEffect, useState } from "react";
 import BoardForm from "../components/board-form";
-
 import TrashCan from "../components/TrashBin";
 import { StrictModeDroppable, useAuth, useToDos } from "../util";
 import { IBoard, IBoardOrder } from "../interface/todo-interface";
@@ -16,18 +15,84 @@ import Board from "../components/Board";
 const Wrapper = styled.div`
   display: flex;
   width: 100vw;
-  margin: 0 auto;
+  min-height: 100vh;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
+  align-items: flex-start;
+  padding: 2rem;
+  background: ${(props) => props.theme.background};
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.5) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
   position: relative;
+  overflow-x: hidden;
+
+  &::before,
+  &::after {
+    content: "✦";
+    position: fixed;
+    font-size: 24px;
+    color: ${(props) => props.theme.primaryAccent};
+    animation: float 3s ease-in-out infinite;
+  }
+
+  &::before {
+    top: 20px;
+    left: 40px;
+  }
+
+  &::after {
+    bottom: 40px;
+    right: 20px;
+    animation-delay: 1.5s;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
 `;
+
 const Boards = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  gap: 20px;
+  padding: 20px;
+  overflow-x: auto;
+  margin-top: 60px;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: ${(props) => props.theme.background};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: ${(props) => props.theme.primaryAccent};
+    border-radius: 4px;
+  }
+`;
+
+const LoadingWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  gap: 10px;
+  height: 100vh;
+  width: 100vw;
+  font-size: 1.5rem;
+  color: ${(props) => props.theme.textPrimary};
+  background: ${(props) => props.theme.background};
 `;
 
 export default function TodosPage() {
@@ -92,6 +157,7 @@ export default function TodosPage() {
       setCardDrop(true);
     }
   };
+
   const onDragEnd = async (info: DropResult) => {
     const { destination, source } = info;
     const token = isLogin();
@@ -106,7 +172,7 @@ export default function TodosPage() {
     }
 
     //삭제
-    else if (destination.droppableId === "trashBin") {
+    if (destination.droppableId === "trashBin") {
       if (source.droppableId === "boards") {
         //board 삭제
         removeBoard(boards[Number(source.index)].boardId, token);
@@ -119,12 +185,10 @@ export default function TodosPage() {
         );
       }
     }
-
     //board 이동
     else if (destination.droppableId === "boards") {
       transportBoard(source.index, destination.index, username, token);
     }
-
     //card 이동
     else {
       transportCard(
@@ -140,41 +204,37 @@ export default function TodosPage() {
   };
 
   return (
-    <>
-      <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
-        <Wrapper className="wrapper">
-          <Suspense fallback={<div>Loading...</div>}>
-            <BoardForm token={token} />
-          </Suspense>
-          <StrictModeDroppable
-            droppableId="boards"
-            direction="horizontal"
-            isDropDisabled={boardDrop}
-          >
-            {(magic) => (
-              <Boards
-                className="boards"
-                ref={magic.innerRef}
-                {...magic.droppableProps}
-              >
-                {boards.map((board, index) => {
-                  return (
-                    <Board
-                      boardId={board.boardId}
-                      title={board.title}
-                      index={index}
-                      key={board.boardId}
-                      token={token}
-                    />
-                  );
-                })}
-                {magic.placeholder}
-              </Boards>
-            )}
-          </StrictModeDroppable>
-          <TrashCan show={showTrashCan} />
-        </Wrapper>
-      </DragDropContext>
-    </>
+    <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      <Wrapper className="wrapper">
+        <Suspense fallback={<LoadingWrapper>Loading...</LoadingWrapper>}>
+          <BoardForm token={token} />
+        </Suspense>
+        <StrictModeDroppable
+          droppableId="boards"
+          direction="horizontal"
+          isDropDisabled={boardDrop}
+        >
+          {(magic) => (
+            <Boards
+              className="boards"
+              ref={magic.innerRef}
+              {...magic.droppableProps}
+            >
+              {boards.map((board, index) => (
+                <Board
+                  boardId={board.boardId}
+                  title={board.title}
+                  index={index}
+                  key={board.boardId}
+                  token={token}
+                />
+              ))}
+              {magic.placeholder}
+            </Boards>
+          )}
+        </StrictModeDroppable>
+        <TrashCan show={showTrashCan} />
+      </Wrapper>
+    </DragDropContext>
   );
 }

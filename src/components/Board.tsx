@@ -15,51 +15,82 @@ interface IAreaProps {
 }
 
 const Area = styled.div<IAreaProps>`
-  background-color: ${(props) =>
+  background: ${(props) =>
     props.isDraggingOver
-      ? props.theme.dropArea.draggingOver
+      ? `${props.theme.primaryAccent}40` // 40 adds 25% opacity
       : props.isDraggingFromThis
-      ? props.theme.dropArea.fromThis
-      : props.theme.dropArea.default};
-  width: 95%;
+      ? `${props.theme.secondaryAccent}40` // 40 adds 25% opacity
+      : "white"};
+  width: 100%;
   flex-grow: 1;
-  transition: background-color 0.3s ease-in-out;
-  padding: 7px 10px 5px 10px;
-  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  padding: 1rem;
+  border-radius: 8px;
+  min-height: 100px;
+  border: ${(props) => props.theme.borders.soft};
 `;
+
 const Title = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 4px;
+  margin-bottom: 1rem;
   width: 100%;
+
   span {
-    font-size: 15px;
+    font-size: 1.25rem;
     font-weight: bold;
+    color: ${(props) => props.theme.textPrimary};
+
+    &::before,
+    &::after {
+      content: "✦";
+      margin: 0 0.5rem;
+      color: ${(props) => props.theme.secondaryAccent};
+      font-size: 0.8rem;
+    }
   }
 `;
+
 const Wrapper = styled.div`
-  width: 250px;
-  background-color: ${(props) => props.theme.boardColor};
-  padding: 10px 5px;
-  border-radius: 5px;
+  width: 280px;
+  background: ${(props) => props.theme.gradients.primary};
+  padding: 1.5rem;
+  border-radius: 12px;
   min-height: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  border: ${(props) => props.theme.borders.pixel};
+  box-shadow: 6px 6px 0 rgba(45, 0, 102, 0.2);
 `;
+
 const Form = styled.form`
-  width: 93%;
-  margin: 10px 0 10px 0;
+  width: 100%;
+  margin-bottom: 1rem;
+
   input {
     width: 100%;
-    height: 25px;
-    border: none;
-    border-radius: 3px;
-    padding: 0 5px 0 5px;
-    box-shadow: rgba(99, 99, 99, 0.3) inset 1px 1px 2px 0px;
+    height: 36px;
+    border: ${(props) => props.theme.borders.soft};
+    border-radius: 8px;
+    padding: 0 1rem;
+    font-size: 0.9rem;
+    background: white;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: ${(props) => props.theme.primaryAccent};
+      box-shadow: 0 0 0 3px rgba(200, 162, 200, 0.2);
+    }
+
+    &::placeholder {
+      color: ${(props) => props.theme.textSecondary};
+    }
   }
 `;
+
 interface IBoardProps {
   index: number;
   boardId: string;
@@ -123,6 +154,7 @@ function Board({ index, boardId, title, token }: IBoardProps) {
     createToDoMutation.mutate(newTodo);
     setValue("text", "");
   };
+
   return (
     <Draggable key={boardId} draggableId={boardId + ""} index={index}>
       {(magic) => (
@@ -149,16 +181,14 @@ function Board({ index, boardId, title, token }: IBoardProps) {
                 isDraggingOver={snapshot.isDraggingOver}
                 isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
               >
-                {toDoList?.map((todo, index) => {
-                  return (
-                    <DraggableCard
-                      key={todo.todoId}
-                      index={index}
-                      toDoId={todo.todoId}
-                      toDoText={todo.text}
-                    />
-                  );
-                })}
+                {toDoList?.map((todo, index) => (
+                  <DraggableCard
+                    key={todo.todoId}
+                    index={index}
+                    toDoId={todo.todoId}
+                    toDoText={todo.text}
+                  />
+                ))}
                 {magic.placeholder}
               </Area>
             )}
