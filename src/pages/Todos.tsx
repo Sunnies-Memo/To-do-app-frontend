@@ -51,7 +51,7 @@ export default function TodosPage() {
   const { data: fetchedData, isError } = useQuery<IBoard[]>({
     queryKey: ["boards data", token],
     queryFn: async () => getBoards(token),
-    staleTime: 1000 * 60 * 15,
+    staleTime: 1000 * 60 * 13,
     refetchOnMount: false,
     enabled: token !== null,
   });
