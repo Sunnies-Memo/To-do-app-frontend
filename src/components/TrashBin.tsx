@@ -1,7 +1,6 @@
 import { styled } from "styled-components";
 import { TrashBin } from "../assets/Icons";
-import { StrictModeDroppable } from "../util";
-import { Droppable } from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
+import { useDroppable } from "@dnd-kit/core";
 
 interface IDeleteTodoBox {
   isDraggingOver: boolean;
@@ -80,25 +79,19 @@ interface ITrashCanProps {
   show: boolean;
 }
 function TrashCan({ show }: ITrashCanProps) {
+  const { setNodeRef } = useDroppable({
+    id: "trashBin",
+    disabled: !show,
+  });
+
   return (
-    <>
-      <StrictModeDroppable droppableId="trashBin" isDropDisabled={!show}>
-        {(magic, snapshot) => (
-          <Wrapper
-            className="TrashBin"
-            ref={magic.innerRef}
-            {...magic.droppableProps}
-          >
-            <TrashCanWrapper show={show}>
-              <DeleteToDoBox isDraggingOver={snapshot.isDraggingOver}>
-                <TrashBin />
-              </DeleteToDoBox>
-            </TrashCanWrapper>
-            {magic.placeholder}
-          </Wrapper>
-        )}
-      </StrictModeDroppable>
-    </>
+    <Wrapper ref={setNodeRef} className="TrashBin">
+      <TrashCanWrapper show={show}>
+        <DeleteToDoBox>
+          <TrashBin />
+        </DeleteToDoBox>
+      </TrashCanWrapper>
+    </Wrapper>
   );
 }
 

@@ -1,8 +1,16 @@
 import {
-  DragDropContext,
-  DropResult,
-  DragStart,
-} from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { cardDrop, orderedBoardList, userNameSelector } from "../atoms";
@@ -149,57 +157,56 @@ export default function TodosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedData, isLogin]);
 
-  const onDragStart = (info: DragStart) => {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const onDragStart = (event: DragStartEvent) => {
     setShowTrashCan(true);
-    if (info.source.droppableId !== "boards") {
-      //Dragging Card
+    const { active } = event;
+    if (active.data.current?.type === "card") {
       setBoardDrop(true);
       setCardDrop(false);
     } else {
-      //Dragging board
       setBoardDrop(false);
       setCardDrop(true);
     }
   };
 
-  const onDragEnd = async (info: DropResult) => {
-    const { destination, source } = info;
-    const token = isLogin();
-    if (
-      !token ||
-      !destination ||
-      (source.droppableId === destination.droppableId &&
-        source.index === destination.index)
-    ) {
+  const onDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) {
       setShowTrashCan(false);
       return;
     }
 
-    //삭제
-    if (destination.droppableId === "trashBin") {
-      if (source.droppableId === "boards") {
-        //board 삭제
-        removeBoard(boards[Number(source.index)].boardId, token);
+    if (over.id === "trashBin") {
+      if (active.data.current?.type === "board") {
+        removeBoard(active.data.current.boardId, token);
       } else {
-        //todo card 삭제
         removeCard(
-          boards[Number(source.droppableId)].boardId,
-          source.index,
+          active.data.current?.boardId,
+          active.data.current?.index,
           token
         );
       }
-    }
-    //board 이동
-    else if (destination.droppableId === "boards") {
-      transportBoard(source.index, destination.index, username, token);
-    }
-    //card 이동
-    else {
+    } else if (active.data.current?.type === "board") {
+      transportBoard(
+        active.data.current.index,
+        over.data.current?.index,
+        username,
+        token
+      );
+    } else {
       transportCard(
-        boards[Number(source.droppableId)]?.boardId,
-        source.index,
-        boards[Number(destination.droppableId)]?.boardId,
-        destination.index,
+        active.data.current?.boardId,
+        active.data.current?.index,
+        over.data.current?.boardId,
+        over.data.current?.index,
         token
       );
     }
@@ -208,37 +215,33 @@ export default function TodosPage() {
   };
 
   return (
-    <DragDropContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+    >
       <Wrapper className="wrapper">
         <Suspense fallback={<LoadingWrapper>Loading...</LoadingWrapper>}>
           <BoardForm token={token} />
         </Suspense>
-        <StrictModeDroppable
-          droppableId="boards"
-          direction="horizontal"
-          isDropDisabled={boardDrop}
+        <SortableContext
+          items={boards.map((board) => board.boardId)}
+          strategy={horizontalListSortingStrategy}
         >
-          {(magic) => (
-            <Boards
-              className="boards"
-              ref={magic.innerRef}
-              {...magic.droppableProps}
-            >
-              {boards.map((board, index) => (
-                <Board
-                  boardId={board.boardId}
-                  title={board.title}
-                  index={index}
-                  key={board.boardId}
-                  token={token}
-                />
-              ))}
-              {magic.placeholder}
-            </Boards>
-          )}
-        </StrictModeDroppable>
+          <Boards className="boards">
+            {boards.map((board, index) => (
+              <Board
+                boardId={board.boardId}
+                title={board.title}
+                index={index}
+                key={board.boardId}
+                token={token}
+              />
+            ))}
+          </Boards>
+        </SortableContext>
         <TrashCan show={showTrashCan} />
       </Wrapper>
-    </DragDropContext>
+    </DndContext>
   );
 }

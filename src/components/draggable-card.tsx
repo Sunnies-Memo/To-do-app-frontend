@@ -1,5 +1,6 @@
 import React from "react";
-import { Draggable } from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { styled } from "styled-components";
 
 interface ICardProps {
@@ -44,22 +45,42 @@ interface IDraggableCard {
   toDoId?: string;
   toDoText: string;
   index: number;
+  boardId: string;
 }
 
-function DraggableCard({ toDoId, toDoText, index }: IDraggableCard) {
+function DraggableCard({ toDoId, toDoText, index, boardId }: IDraggableCard) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: toDoId || "",
+    data: {
+      type: "card",
+      toDoId,
+      boardId,
+      index,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <Draggable key={toDoId} draggableId={"todoCard" + toDoId} index={index}>
-      {(magic, snapshot) => (
-        <Card
-          isDragging={snapshot.isDragging}
-          ref={magic.innerRef}
-          {...magic.draggableProps}
-          {...magic.dragHandleProps}
-        >
-          {toDoText}
-        </Card>
-      )}
-    </Draggable>
+    <Card
+      ref={setNodeRef}
+      style={style}
+      isDragging={isDragging}
+      {...attributes}
+      {...listeners}
+    >
+      {toDoText}
+    </Card>
   );
 }
 

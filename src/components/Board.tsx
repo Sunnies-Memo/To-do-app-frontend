@@ -2,10 +2,12 @@ import { styled } from "styled-components";
 import { cardDrop, cardListSelector, lastToDoIndexSelector } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
-  Draggable,
-  Droppable,
-} from "@atlaskit/pragmatic-drag-and-drop-react-beautiful-dnd-migration";
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import React, { useEffect, useRef } from "react";
 import { IBoard, ITodo } from "../interface/todo-interface";
 import { createToDo } from "../api/todo-api";
@@ -158,47 +160,54 @@ function Board({ index, boardId, title, token }: IBoardProps) {
     setValue("text", "");
   };
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: boardId,
+    data: {
+      type: "board",
+      boardId,
+      index,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <Draggable key={boardId} draggableId={boardId + ""} index={index}>
-      {(magic) => (
-        <Wrapper ref={magic.innerRef} {...magic.draggableProps}>
-          <Title {...magic.dragHandleProps}>
-            <span>{title}</span>
-          </Title>
-          <Form onSubmit={handleSubmit(onValid)}>
-            <input
-              {...register("text", { required: true })}
-              type="text"
-              placeholder={`Add task on ${title}`}
+    <Wrapper ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Title>{title}</Title>
+      <Form onSubmit={handleSubmit(onValid)}>
+        <input
+          {...register("text", { required: true })}
+          type="text"
+          placeholder={`Add task on ${title}`}
+        />
+      </Form>
+      <SortableContext
+        items={toDoList?.map((todo) => todo.todoId) || []}
+        strategy={verticalListSortingStrategy}
+      >
+        <Area>
+          {toDoList?.map((todo, index) => (
+            <DraggableCard
+              key={todo.todoId}
+              index={index}
+              toDoId={todo.todoId}
+              toDoText={todo.text}
+              boardId={boardId}
             />
-          </Form>
-          <Droppable
-            droppableId={index + ""}
-            isDropDisabled={isCardDrop}
-            key={boardId}
-          >
-            {(magic, snapshot) => (
-              <Area
-                ref={magic.innerRef}
-                {...magic.droppableProps}
-                isDraggingOver={snapshot.isDraggingOver}
-                isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
-              >
-                {toDoList?.map((todo, index) => (
-                  <DraggableCard
-                    key={todo.todoId}
-                    index={index}
-                    toDoId={todo.todoId}
-                    toDoText={todo.text}
-                  />
-                ))}
-                {magic.placeholder}
-              </Area>
-            )}
-          </Droppable>
-        </Wrapper>
-      )}
-    </Draggable>
+          ))}
+        </Area>
+      </SortableContext>
+    </Wrapper>
   );
 }
 
