@@ -17,6 +17,7 @@ import {
 } from "../atoms";
 import { moveBoard, moveToDo } from "../api/todo-api";
 import { IBoard, IBoardUpdate, ITodo } from "../interface/todo-interface";
+import { useState } from "react";
 
 /**
  * 드래그 앤 드롭되는 아이템의 기본 정보를 정의하는 인터페이스
@@ -31,6 +32,11 @@ interface DragItem {
 export const useDragAndDrop = () => {
   const token = useRecoilValue(userToken);
   const userName = useRecoilValue(userNameSelector);
+  const [dragState, setDragState] = useState({
+    isDragging: false,
+    draggedType: null as "BOARD" | "CARD" | null,
+    sourceId: null as string | null,
+  });
 
   /**
    * 드래그 앤 드롭을 위한 센서 설정
@@ -53,17 +59,31 @@ export const useDragAndDrop = () => {
    * @returns 새로운 orderIndex 값
    */
   const calculateNewIndex = (
-    prevIndex: number | null,
-    nextIndex: number | null
+    prevIndex: number | null | undefined,
+    nextIndex: number | null | undefined
   ): number => {
-    if (prevIndex != null && nextIndex != null) {
-      return Math.floor((prevIndex + nextIndex) / 2);
-    } else if (prevIndex == null && nextIndex != null) {
-      return Math.floor(nextIndex / 2);
-    } else if (nextIndex == null && prevIndex != null) {
-      return prevIndex + 10;
+    // null이나 undefined면 null로 통일
+    const normalizedPrevIndex = prevIndex ?? null;
+    const normalizedNextIndex = nextIndex ?? null;
+
+    if (normalizedPrevIndex !== null && normalizedNextIndex !== null) {
+      // 이전 인덱스와 다음 인덱스가 모두 존재하는 경우 = 중간으로 이동
+      // 현재 인덱스는 이전 인덱스와 다음 인덱스의 중간값
+      return Math.floor((normalizedPrevIndex + normalizedNextIndex) / 2);
     }
-    return 10; // 기본값
+    if (normalizedPrevIndex === null && normalizedNextIndex === null) {
+      // 이전 인덱스도 없고 다음 인덱스도 없는 경우 = 빈 보드로 이동
+      // 현재 인덱스는 10
+      return 10;
+    }
+    if (normalizedPrevIndex === null) {
+      // 이전 인덱스가 없고 다음 인덱스가 존재하는 경우 = 맨 앞으로 이동
+      // 현재 인덱스는 다음 인덱스의 절반
+      return Math.floor((normalizedNextIndex as number) / 2);
+    }
+    // 다음 인덱스가 없고 이전 인덱스가 존재하는 경우 = 맨 뒤로 이동
+    // 현재 인덱스는 이전 인덱스 + 10
+    return normalizedPrevIndex + 10;
   };
 
   /**
@@ -75,7 +95,11 @@ export const useDragAndDrop = () => {
       async (event: DragStartEvent) => {
         const { active } = event;
         const draggedItem = active.data.current as DragItem;
-        // 추가적인 드래그 시작 로직이 필요한 경우 여기에 구현
+        setDragState({
+          isDragging: true,
+          draggedType: draggedItem.type,
+          sourceId: draggedItem.id,
+        });
       }
   );
 
@@ -143,7 +167,8 @@ export const useDragAndDrop = () => {
 
           // 이전/다음 인덱스 계산
           const prevIndex =
-            destinationIdx > 0
+            destinationIdx > 0 &&
+            orderedBoards[destinationIdx - 1]?.orderIndex !== undefined
               ? orderedBoards[destinationIdx - 1].orderIndex
               : null;
           const nextIndex =
@@ -188,7 +213,8 @@ export const useDragAndDrop = () => {
 
           // 이전/다음 인덱스 계산
           const prevIndex =
-            targetItem.sourceIndex > 0
+            targetItem.sourceIndex > 0 &&
+            targetCards[targetItem.sourceIndex - 1]?.orderIndex !== undefined
               ? targetCards[targetItem.sourceIndex - 1].orderIndex
               : null;
           const nextIndex =
@@ -234,5 +260,6 @@ export const useDragAndDrop = () => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
+    dragState,
   };
 };

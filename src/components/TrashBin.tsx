@@ -79,15 +79,17 @@ interface ITrashCanProps {
   show: boolean;
 }
 function TrashCan({ show }: ITrashCanProps) {
-  const { setNodeRef } = useDroppable({
+  const { setNodeRef, isOver, active } = useDroppable({
     id: "trashBin",
     disabled: !show,
   });
 
+  const isDraggingOver = Boolean(isOver && active);
+
   return (
-    <Wrapper ref={setNodeRef} className="TrashBin">
+    <Wrapper ref={setNodeRef}>
       <TrashCanWrapper show={show}>
-        <DeleteToDoBox>
+        <DeleteToDoBox isDraggingOver={isDraggingOver}>
           <TrashBin />
         </DeleteToDoBox>
       </TrashCanWrapper>

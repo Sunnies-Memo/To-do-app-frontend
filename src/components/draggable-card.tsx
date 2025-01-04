@@ -11,7 +11,7 @@ const Card = styled.div<ICardProps>`
   background: ${(props) =>
     props.isDragging
       ? props.theme.primaryAccent
-      : `${props.theme.primaryAccent}40`}; // 40 adds 25% opacity
+      : `${props.theme.primaryAccent}40`};
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
@@ -28,8 +28,7 @@ const Card = styled.div<ICardProps>`
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0px 4px 8px rgba(45, 0, 102, 0.1);
-    background: ${(props) =>
-      `${props.theme.primaryAccent}80`}; // 80 adds 50% opacity
+    background: ${(props) => `${props.theme.primaryAccent}80`};
   }
 
   &::before {
@@ -59,22 +58,20 @@ function DraggableCard({ toDoId, toDoText, index, boardId }: IDraggableCard) {
   } = useSortable({
     id: toDoId || "",
     data: {
-      type: "card",
-      toDoId,
+      type: "CARD",
+      id: toDoId,
+      sourceIndex: index,
       boardId,
-      index,
     },
   });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
 
   return (
     <Card
       ref={setNodeRef}
-      style={style}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
       isDragging={isDragging}
       {...attributes}
       {...listeners}

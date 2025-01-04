@@ -1,5 +1,5 @@
 import { styled } from "styled-components";
-import { cardDrop, cardListSelector, lastToDoIndexSelector } from "../atoms";
+import { cardListSelector, lastToDoIndexSelector } from "../atoms";
 import { useRecoilValue } from "recoil";
 import { useForm } from "react-hook-form";
 import { useSortable } from "@dnd-kit/sortable";
@@ -22,9 +22,9 @@ interface IAreaProps {
 const Area = styled.div<IAreaProps>`
   background: ${(props) =>
     props.isDraggingOver
-      ? `${props.theme.primaryAccent}40` // 40 adds 25% opacity
+      ? `${props.theme.primaryAccent}40`
       : props.isDraggingFromThis
-      ? `${props.theme.secondaryAccent}40` // 40 adds 25% opacity
+      ? `${props.theme.secondaryAccent}40`
       : "white"};
   width: 100%;
   flex-grow: 1;
@@ -106,7 +106,6 @@ interface IBoardProps {
 function Board({ index, boardId, title, token }: IBoardProps) {
   const queryClient = useQueryClient();
   const { register, handleSubmit, setValue } = useForm<ITodo>();
-  const isCardDrop = useRecoilValue(cardDrop);
   const toDoList = useRecoilValue(cardListSelector(boardId));
   const lastIndex = useRecoilValue(lastToDoIndexSelector(boardId));
 
@@ -167,23 +166,33 @@ function Board({ index, boardId, title, token }: IBoardProps) {
     transform,
     transition,
     isDragging,
+    active,
+    over,
   } = useSortable({
     id: boardId,
     data: {
-      type: "board",
-      boardId,
-      index,
+      type: "BOARD",
+      id: boardId,
+      sourceIndex: index,
     },
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const isOverCurrent = over?.id === boardId;
+  const isDraggingCard = active?.data.current?.type === "CARD";
 
   return (
-    <Wrapper ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Title>{title}</Title>
+    <Wrapper
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      <Title>
+        <span>{title}</span>
+      </Title>
       <Form onSubmit={handleSubmit(onValid)}>
         <input
           {...register("text", { required: true })}
@@ -192,10 +201,17 @@ function Board({ index, boardId, title, token }: IBoardProps) {
         />
       </Form>
       <SortableContext
-        items={toDoList?.map((todo) => todo.todoId) || []}
+        items={
+          toDoList
+            ?.map((todo) => todo.todoId)
+            .filter((id): id is string => id !== undefined) || []
+        }
         strategy={verticalListSortingStrategy}
       >
-        <Area>
+        <Area
+          isDraggingOver={isOverCurrent && isDraggingCard}
+          isDraggingFromThis={isDragging}
+        >
           {toDoList?.map((todo, index) => (
             <DraggableCard
               key={todo.todoId}

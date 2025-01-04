@@ -276,12 +276,20 @@ export const useToDos = () => {
 
           let currIndex: number;
           if (prevIndex != null && nextIndex != null) {
+            //이전 인덱스가 존재하고 다음 인덱스가 존재하는 경우 = 중간으로 이동
+            //현재 인덱스는 이전 인덱스와 다음 인덱스의 중간값
             currIndex = Math.floor((prevIndex + nextIndex) / 2);
           } else if (prevIndex == null && nextIndex == null) {
+            //이전 인덱스도 없고 다음 인덱스도 없는 경우 = 빈 보드로 이동
+            //현재 인덱스는 10
             currIndex = 10;
           } else if (prevIndex == null && nextIndex) {
+            //이전 인덱스가 없고 다음 인덱스가 존재하는 경우 = 맨 앞으로 이동
+            //현재 인덱스는 다음 인덱스의 절반
             currIndex = Math.floor(nextIndex / 2);
           } else if (nextIndex == null && prevIndex) {
+            //다음 인덱스가 없고 이전 인덱스가 존재하는 경우 = 맨 뒤로 이동
+            //현재 인덱스는 이전 인덱스 + 10
             currIndex = prevIndex + 10;
           } else {
             return;
